@@ -1,6 +1,23 @@
+import { Game } from "../core/game.js"
+import { Hitbox } from "./hitbox.js"
+import { Map } from "../world/map.js"
+import { Tileset } from "../world/tileset.js"
+
 export class Entity {
-  constructor(game, tileset, collision_hitbox, combat_hitbox, worldX, worldY, animation_duration) {
+
+  /**
+   * @param {Game} game
+   * @param {Map} map 
+   * @param {Tileset} tileset
+   * @param {Hitbox} collision_hitbox
+   * @param {Hitbox} combat_hitbox
+   * @param {Number} worldX
+   * @param {Number} worldY
+   * @param {Number} animation_duration    
+   */
+  constructor(game, map, tileset, collision_hitbox, combat_hitbox, worldX, worldY, animation_duration) {
     this.game = game
+    this.map = map
 
     // World position at the center
     this.worldX = worldX
@@ -54,7 +71,7 @@ export class Entity {
     )
   }
 
-	updateCollisionHitbox() {
+	updateCollisionHitbox() {
 		this.collision_hitbox.set(this.worldX - this.collision_hitbox.width / 2, this.worldY)
 	}
 
@@ -99,14 +116,14 @@ export class Entity {
   }
 
   render() {
-    if (this.isWithinCameraView()) {
-      this.tileset.drawTile(
-        4 * this.direction + (this.animation_step !== -1 ? this.animation_step : 0) + 1,
-        this.worldX - this.game.camera.x - this.game.TILE_SIZE / 2,
-        this.worldY - this.game.camera.y - this.game.TILE_SIZE / 2
-      )
-      this.collision_hitbox.render()
-      this.combat_hitbox.render()
+    if(this.game.get_current_map() == this.map){
+      if (this.isWithinCameraView()) {
+        this.tileset.drawTile(
+          4 * this.direction + (this.animation_step !== -1 ? this.animation_step : 0) + 1,
+          this.worldX - this.game.camera.x - this.game.TILE_SIZE / 2,
+          this.worldY - this.game.camera.y - this.game.TILE_SIZE / 2
+        )
+      }
     }
   }
 

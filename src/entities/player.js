@@ -1,12 +1,17 @@
+import { Game } from '../core/game.js'
 import { Entity } from './entity.js'
 import { Hitbox } from './hitbox.js'
 
 export class Player extends Entity {
+	/**
+	 * @param {Game} game 
+	 * @param {TileSet} player_tileset 
+	 */
 	constructor(game, player_tileset) {
 		super(
-			game, player_tileset,
-			new Hitbox(game, 400, 400 + game.TILE_SIZE / 2, game.TILE_SIZE, game.TILE_SIZE / 2, true, true),
-			new Hitbox(game, 400, 400, game.TILE_SIZE, game.TILE_SIZE, false, true),
+			game, game.get_current_map(), player_tileset,
+			new Hitbox(game, game.get_current_map(), 400, 400 + game.TILE_SIZE / 2, game.TILE_SIZE, game.TILE_SIZE / 2, true, true),
+			new Hitbox(game, game.get_current_map(), 400, 400, game.TILE_SIZE, game.TILE_SIZE, false, true),
 			600, 600, 175
 		)
 
@@ -21,7 +26,7 @@ export class Player extends Entity {
 		this.dash_duration = 150
 	}
 
-update(current_time) {
+	update(current_time) {
 		// Handle player movement
 		if (this.inputHandler.isKeyPressed(' ') && current_time - this.last_dash >= this.dash_cooldown) {
 			this.acceleration = 10
@@ -54,7 +59,25 @@ update(current_time) {
 
 		super.update(current_time)
 
+		this.collision_hitbox.get_colliding_hitboxes(true, false).forEach(hitbox => {
+			hitbox.command()
+		})
+
+		this.combat_hitbox.get_colliding_hitboxes(false, true).forEach(hitbox => {
+			hitbox.command()
+		})
+
+		this.collision_hitbox.get_colliding_hitboxes(false, false).forEach(hitbox => {
+			hitbox.command()
+		})
+
 		this.collision_hitbox.set(this.worldX - this.game.TILE_SIZE / 2, this.worldY)
 		this.combat_hitbox.set(this.worldX - this.game.TILE_SIZE / 2, this.worldY - this.game.TILE_SIZE / 2)
+	}
+
+	set_map(new_map){
+		this.map = new_map
+		this.collision_hitbox.set_map(new_map)
+		this.combat_hitbox.set_map(new_map)
 	}
 }
