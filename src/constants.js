@@ -4,7 +4,7 @@ export const config = {
 }
 
 export const constants = {
-    DEBUG: false,
+    DEBUG: true,
 
     TILE_SIZE: 128,
 
@@ -39,6 +39,9 @@ export const constants = {
 // still need a bit cleaner way to do it tho
 export const collisions = {
     "map.json": {
+        76: { width: 96, height: 112},
+        113: {x: 16, y: 24, width: 96, height: 88},
+        114: {x: 32, width: 64, height: 112},
         127: {x: 56, width: 72},
         131: {width: 72},
         167: {x: 56, width: 72, height: 110},

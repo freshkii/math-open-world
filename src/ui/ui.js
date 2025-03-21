@@ -1,4 +1,6 @@
 import { Game } from "../core/game.js";
+import { Hitbox } from "../entities/hitbox.js";
+import { Talkable } from "../entities/talkable.js";
 import { TextArea, Widget } from "./widgets.js";
 
 export class Ui {
@@ -14,6 +16,7 @@ export class Ui {
         this.game = game
         this.width = width
         this.height = height
+        this.source = null
         this.widgets = widgets
         this.ids = []
         this.widgets.forEach((widget) => {
@@ -61,6 +64,14 @@ export class Ui {
 			img.onload = resolve
 			img.onerror = reject
 		})
+    }
+
+    /**
+     * 
+     * @param {Talkable | Hitbox} source 
+     */
+    set_source(source){
+        this.source = source
     }
 
     render(){

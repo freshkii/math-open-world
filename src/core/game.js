@@ -85,45 +85,54 @@ export class Game {
 		const black_transition = new UnicoloreTransition(this, 500, "black")
 
 		const colors_problem = await Problem.create(
-			this, config.IMG_DIR + "parchment1.png", 500, 500, "colors",
+			this, config.IMG_DIR + "book_ui.png", 440, 580, "colors",
 			[
-				new Label(this, "label-red", -150, -78, "Rouge:", true, 30, "black", "Times New Roman"),
-				new NumberArea(this, "numberarea-red", -50, -110, 100, 50, 1, true, (answer, numberarea) => {}, 20, "black", "Times New Roman"),
+				new NumberArea(this, "numberarea-red", -100, -110, 60, 80, 1, true, (answer, numberarea) => {}, 80, "black", "Times New Roman", ""),
 
-				new Label(this, "label-green", -130, 4, "Vert:", true, 30, "black", "Times New Roman"),
-				new NumberArea(this, "numberarea-green", -50, -30, 100, 50, 1, true, (answer, numberarea) => {}, 20, "black", "Times New Roman"),
+				new NumberArea(this, "numberarea-green", -20, -110, 60, 80, 1, true, (answer, numberarea) => {}, 80, "black", "Times New Roman", ""),
 
-				new Label(this, "label-yellow", -150, 82, "Jaune:", true, 30, "black", "Times New Roman"),
-				new NumberArea(this, "numberarea-yellow", -50, 50, 100, 50, 1, true, (answer, numberarea) => {}, 20, "black", "Times New Roman"),
+				new NumberArea(this, "numberarea-yellow", 60, -110, 60, 80, 1, true, (answer, numberarea) => {}, 80, "black", "Times New Roman", ""),
 
-				new Button(this, "button-submit", -50, 155, 100, 50, true, (button) => {
-					const numberarea_red = button.ui.get_widget("numberarea-red");
-					const numberarea_green = button.ui.get_widget("numberarea-green");
-					const numberarea_yellow = button.ui.get_widget("numberarea-yellow");
-
-					if (numberarea_red.content === "3" && numberarea_green.content === "2" && numberarea_yellow.content === "3") {
-						button.ui.is_finished = true;
-						console.log("bonnes réponses");
-						//colors_problem.destroy()
-					} else {
-						console.log("mauvaises réponses [debug: bonnes réponses sont 3, 2, 3]");
-						console.log(numberarea_red.content, numberarea_green.content , numberarea_yellow.content );
-					}
+				// No more needed but I leave it there in case
+				// new Button(this, "button-submit", -50, 155, 100, 50, true, (button) => {
+					
+				// }),
+				new Button(this, "button-undo-1", 200, -(this.canvas.height / 2), this.canvas.width / 2 - 200, this.canvas.height, true,(button)=>{
+					button.ui.is_finished=true
 				}),
-				new Button(this,"button-undo",125,-211,50,50,true,(button)=>{
+				new Button(this, "button-undo-2", -(this.canvas.width / 2), -(this.canvas.height / 2), this.canvas.width / 2 - 200, this.canvas.height, true, (button)=>{
+					button.ui.is_finished=true
+				}),
+				new Button(this, "button-undo-3", -200, 230, 400, this.canvas.height / 2 - 230, true, (button)=>{
+					button.ui.is_finished=true
+				}),
+				new Button(this, "button-undo-4", -200, -(this.canvas.height / 2), 400, this.canvas.height / 2 - 270, true, (button)=>{
 					button.ui.is_finished=true
 				})
 			],
 			(problem) => {
-				if (problem.get_widget("button-submit").is_clicked) {
-					console.log("button cliked");
+				if(problem.get_widget("number-area-red").has_focus){
+
+				} else {
+					
 				}
+
+				const numberarea_red = problem.get_widget("numberarea-red");
+				const numberarea_green = problem.get_widget("numberarea-green");
+				const numberarea_yellow = problem.get_widget("numberarea-yellow");
+
+				if (numberarea_red.content === "3" && numberarea_green.content === "2" && numberarea_yellow.content === "3") {
+					problem.is_finished = true;
+					problem.source.is_talkable = false
+					console.log("bonnes réponses");
+				}	
 			}
 		)
-		new Talkable(this, this.get_current_map(),
+		const colors_problem_shelf = new Talkable(this, this.get_current_map(),
 			new Hitbox(this, this.get_current_map(), 0, constants.TILE_SIZE * 2, this.TILE_SIZE, this.TILE_SIZE, true, false, null, (e, h, t) => {}),
 			colors_problem, null
 		)
+		colors_problem.set_source(colors_problem_shelf)
 
 		// SWITCH MAP HITBOXES
 		// -- from the house (manual)
@@ -265,8 +274,10 @@ export class Game {
 
 		this.get_current_map().render_perspective()
 		
-		this.hitboxes.forEach(hitbox => {hitbox.render()})
-		this.talkables.forEach(talkable => {talkable.render()})
+		if(constants.DEBUG){
+			this.hitboxes.forEach(hitbox => {hitbox.render()})
+			this.talkables.forEach(talkable => {talkable.render()})
+		}
 
 		if(this.current_ui){
 			this.current_ui.render()

@@ -16,6 +16,8 @@ export class Map {
 		this.tileset = tileset
 		/** @type {Array<Array<Number>>} */
 		this.layers = []
+		/** @type {Array<Array<Number>>} */
+		this.perpective_layers = []
 		this.world = {}
 		this.background = background
 		this.player_pos = player_pos
@@ -57,7 +59,11 @@ export class Map {
 			this.world.height = this.height * this.game.TILE_SIZE
 			for (let layer of body.layers) {
 				if (layer.type === "tilelayer") {
-					this.layers.push(layer.data)
+
+					if(layer.is_before_player)
+						this.layers.push(layer.data)
+					else
+						this.perpective_layers.push(layer.data)
 
 					// create hitboxes for blocks tiles
 					if (layer.name === "Blocks") {
@@ -135,7 +141,7 @@ export class Map {
 		new Hitbox(this.game, this, 0, 0, this.world.width, this.world.height)
 	}
 
-	/*
+	/**
 	 * @param {Number} layer_i 
 	 * @param {Number} x 
 	 * @param {Number} y 
@@ -145,7 +151,18 @@ export class Map {
 		return this.layers[layer_i][y * this.width + x]
 	}
 
-	/*
+	/**
+	 * 
+	 * @param {Number} layer_i 
+	 * @param {Number} x 
+	 * @param {Number} y 
+	 * @returns {Number}
+	 */
+	get_perspective_cell(layer_i, x, y){
+		return this.perpective_layers[layer_i][y * this.width + x]
+	}
+
+	/**
 	 * Renders only the background, the ground and the "Blocks"
 	 */
 	render_ground_blocks() {
@@ -161,7 +178,7 @@ export class Map {
 				const screenX = x * this.game.TILE_SIZE - this.game.camera.x;
 				const screenY = y * this.game.TILE_SIZE - this.game.camera.y;
 
-				for (let i = 0; i < Math.min(2, this.layers.length); i++) {
+				for (let i = 0; i < this.layers.length; i++) {
 					const tile_num = this.get_cell(i, x, y);
 					if (tile_num !== 0) // skips empty tiles 
 						this.tileset.drawTile(tile_num, screenX, screenY);
@@ -185,8 +202,8 @@ export class Map {
 				const screenX = x * constants.TILE_SIZE - this.game.camera.x;
 				const screenY = y * constants.TILE_SIZE - this.game.camera.y;
 
-				for (let i = 2; i < this.layers.length; i++) { // as the two first layers are ground and blocks
-					const tile_num = this.get_cell(i, x, y);
+				for (let i = 0; i < this.perpective_layers.length; i++) {
+					const tile_num = this.get_perspective_cell(i, x, y);
 					if (tile_num !== 0) // skips empty tiles 
 						this.tileset.drawTile(tile_num, screenX, screenY);
 				}

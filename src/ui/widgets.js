@@ -103,7 +103,7 @@ export class Button extends Widget{
     }
 
     render(){
-        if(this.rendered){
+        if(this.rendered && constants.DEBUG){
             this.game.ctx.strokeStyle = "blue"
             this.game.ctx.strokeRect(
                 this.game.canvas.width / 2 + this.x,
@@ -150,7 +150,7 @@ export class TextArea extends Widget{
      * @param {String} [font="arial"] - The textarea's text font
      * @param {String} [blink_bar="I"] - The blinking bar when the textarea is selected
      */
-    constructor(game, id, x, y, width, height, max_char_number, rendered, command, fontsize=15, textcolor="black", font="arial", blink_bar="I"){
+    constructor(game, id, x, y, width, height, max_char_number, rendered, command, fontsize=15, textcolor="black", font="arial", blink_bar="|"){
         super(game, id, x, y, constants.TEXTAREA_TYPE, rendered)
         this.width = width
         this.height = height
@@ -172,18 +172,21 @@ export class TextArea extends Widget{
 
     render(){
         if(this.rendered){
-            this.game.ctx.strokeStyle = "blue"
-            this.game.ctx.strokeRect(
-                this.game.canvas.width / 2 + this.x,
-                this.game.canvas.height / 2 + this.y,
-                this.width, this.height
-            )
+            if(constants.DEBUG){
+                this.game.ctx.strokeStyle = "blue"
+                this.game.ctx.strokeRect(
+                    this.game.canvas.width / 2 + this.x,
+                    this.game.canvas.height / 2 + this.y,
+                    this.width, this.height
+                )
+            }
             this.game.ctx.fillStyle = this.textcolor
             this.game.ctx.font = `${this.fontsize}px ${this.font}`
             this.game.ctx.fillText(
                 this.content + (this.has_bar ? this.blink_bar: ""),
                 this.game.canvas.width / 2 + this.x,
-                this.y + (this.game.canvas.height + this.height) / 2)
+                this.y + ((this.game.canvas.height + this.height) / 2) + (this.fontsize / 4)
+            )
         }
     }
 

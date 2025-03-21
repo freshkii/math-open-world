@@ -20,6 +20,7 @@ export class Talkable{
         this.hitbox = hitbox
         this.ui = ui
         this.entity = entity
+        this.is_talkable = true
 
         this.game.talkables.push(this)
     }
@@ -43,7 +44,8 @@ export class Talkable{
     update(){
         if(this.game.inputHandler.keys_down[constants.INTERACTION_KEY]){
             if(this.game.player.raycast_hitbox.is_colliding(this.hitbox)){
-                this.on_interact()
+                if(this.is_talkable)
+                    this.on_interact()
             }
         }
         if(this.entity)

@@ -17,7 +17,8 @@
          "visible":true,
          "width":8,
          "x":0,
-         "y":0
+         "y":0,
+         "is_before_player":true
         }, 
         {
          "data":[358, 360, 0, 30, 29, 32, 31, 30,
@@ -34,7 +35,8 @@
          "visible":true,
          "width":8,
          "x":0,
-         "y":0
+         "y":0,
+         "is_before_player":true
         }],
  "nextlayerid":3,
  "nextobjectid":1,

@@ -14,7 +14,7 @@ export class Problem extends Ui{
      */
     constructor(game, width, height, answer, widgets, widgets_state_handler){
         super(game, width, height, widgets, widgets_state_handler)
-        this.answer= answer
+        this.answer = answer
     }
 
     /**
@@ -25,7 +25,8 @@ export class Problem extends Ui{
      * @param {Number} height - The Problem's height on the screen
      * @param {String} answer - The right answer that the player should answer to solve the problem
      * @param {Array<Widget>} widgets - The list of widgets that shows up on the ui
-     * @param {(problem: Problem) => void} widgets_state_handler - - method made to handle widgets states (like widgets being 'cliked' on 'focused-on'), executed at each update
+     * @param {(problem: Problem) => void} widgets_state_handler - method made to handle widgets states (like widgets being 'cliked' on 'focused-on'), executed at each update
+     * @returns {Problem}
      */
     static async create(game, src, width, height, answer, widgets, widgets_state_handler){
         const problem = new Problem(game, width, height, answer, widgets, widgets_state_handler)
