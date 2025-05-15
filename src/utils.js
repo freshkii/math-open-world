@@ -1,7 +1,7 @@
 import { Game } from "./core/game.js"
 
 /**
- * @param {Number} value 
+ * @param {Number} x 
  * @param {Number} min 
  * @param {Number} max 
  * @returns {Number}

@@ -140,9 +140,11 @@ export class Game {
 		await Tileset.create(this, "spider_tileset.png", 100, constants.TILE_SIZE * 4, 0)
 		await Tileset.create(this, "book_ui_focus.png", 4, this.canvas.width / 16, 0)
 		await Tileset.create(this, "next_page_arrow_tileset.png", 24, this.canvas.width * 0.05, 0)
+		await Tileset.create(this, 'Kanji.png', 16, constants.TILE_SIZE, 0)
 		await Tileset.create(this, 'Axe.png', 16, constants.TILE_SIZE, 0)
 		await Tileset.create(this, "selection_cursor.png", 16, constants.TILE_SIZE / 2, 0)
 		await Tileset.create(this, "checkbox_tileset.png", 32, constants.TILE_SIZE / 2, 0)
+		await Tileset.create(this, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
 
 		await Map.create(this, 'house.json', this.tilesets["cabane_tileset"], "black", {x: constants.TILE_SIZE * 1.5, y: 3 * constants.TILE_SIZE}),
 		await Map.create(this, 'map.json', this.tilesets["map"], "grey", {x: 15.5 * constants.TILE_SIZE, y: 14.01 * constants.TILE_SIZE})
@@ -157,8 +159,6 @@ export class Game {
 		new Spider(this, this.maps["map"], constants.TILE_SIZE * 2, constants.TILE_SIZE * 2)
 		new Frog(this, this.maps["map"], constants.TILE_SIZE * 12, constants.TILE_SIZE * 12, 0.5)
 
-		await Tileset.create(this, 'Kanji.png', 16, constants.TILE_SIZE, 0)
-		
     const inventory = await Inventory.create(this, "inventory.png")
 		this.player = new Player(this, this.tilesets["Kanji"], inventory)
 
@@ -553,7 +553,7 @@ export class Game {
 		new Talkable(this, this.maps["new_map"], new Hitbox(this, this.maps["new_map"], 118 * constants.TILE_SIZE, 72 * constants.TILE_SIZE, constants.TILE_SIZE * 2, constants.TILE_SIZE * 2), bridge_dialogues[4])
 		new Talkable(this, this.maps["new_map"], new Hitbox(this, this.maps["new_map"], 125 * constants.TILE_SIZE, 70 * constants.TILE_SIZE, constants.TILE_SIZE * 2, constants.TILE_SIZE * 2), bridge_dialogues[5])
 		new Talkable(this, this.maps["new_map"], new Hitbox(this, this.maps["new_map"], 129 * constants.TILE_SIZE, 76 * constants.TILE_SIZE, constants.TILE_SIZE * 2, constants.TILE_SIZE * 2), bridge_dialogues[6])
-		new Talkable(this, this.maps["new_map"], new Hitbox(this, this.maps["new_map"], 129 * constants.TILE_SIZE, 73 * constants.TILE_SIZE, constants.TILE_SIZE * 2, constants.TILE_SIZE * 2), bridge_dialogues[7])
+		new Talkable(this, this.maps["new_map"], new Hitbox(this, this.maps["new_map"], 135 * constants.TILE_SIZE, 73 * constants.TILE_SIZE, constants.TILE_SIZE * 2, constants.TILE_SIZE * 2), bridge_dialogues[7])
 
 
 		requestAnimationFrame(this.loop.bind(this))

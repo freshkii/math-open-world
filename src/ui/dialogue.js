@@ -54,8 +54,7 @@ export class Dialogue extends Ui{
      * @returns {Promise<Dialogue>}
      */
     static async create(game, src, text, on_end=(d) => {}, fontsize=15, textcolor="black", font="arial"){
-        let arrow_tileset = await Tileset.create(game, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
-        const dialogue = new Dialogue(game, text, arrow_tileset, on_end, fontsize, textcolor, font)
+        const dialogue = new Dialogue(game, text, game.tilesets["arrow"], on_end, fontsize, textcolor, font)
         try {
 			await dialogue.load(config.IMG_DIR + src)
 		} catch (error) {
@@ -69,6 +68,8 @@ export class Dialogue extends Ui{
         super.update(current_time)
         if(current_time - this.last_time < 80) return
         this.last_time = current_time
+        if(this.game.inputHandler.isKeyPressed("enter"))
+            this.next()
         /** @type {Label} */
         var label = this.get_widget("dialogue-content")
         if(label.text == this.sentences[this.sentence]) return
@@ -203,10 +204,9 @@ export class QuestionDialogue extends Ui {
     static async create(game, src, text, anwsers, anwsers_x, anwsers_y, anwsers_width, anwsers_height, anwser_box_tileset_src, on_end=(d, a) => {}, fontsize=15, textcolor="black", font="arial"){
         anwsers_width = Math.round(anwsers_width)
         anwsers_height = Math.round(anwsers_height)
-        let arrow_tileset = await Tileset.create(game, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
         let anwser_box_tileset = await Tileset.create(game, anwser_box_tileset_src, 16, 0, 0)
         anwser_box_tileset.screen_tile_size = new YResizeable(game, anwsers_height)
-        const dialogue = new QuestionDialogue(game, text, arrow_tileset, anwsers, anwsers_x, anwsers_y, anwsers_width, anwsers_height, anwser_box_tileset, on_end, fontsize, textcolor, font)
+        const dialogue = new QuestionDialogue(game, text, game.tilesets["arrow"], anwsers, anwsers_x, anwsers_y, anwsers_width, anwsers_height, anwser_box_tileset, on_end, fontsize, textcolor, font)
         try {
 			await dialogue.load(config.IMG_DIR + src)
 		} catch (error) {
@@ -221,7 +221,14 @@ export class QuestionDialogue extends Ui {
 
         if(current_time - this.last_time < 80) return
         this.last_time = current_time
-        
+
+        if(this.game.inputHandler.isKeyPressed("enter")){
+            this.next()
+            if(this.focused_widgets.length > 1){
+                let selected_awnser = this.focused_widgets.filter(widget => widget != this.get_widget("new-line-button"))[0]
+                selected_awnser.command(selected_awnser, current_time)
+            }
+        }
         /** @type {Label} */
         var label = this.get_widget("dialogue-content")
         
