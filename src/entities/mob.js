@@ -1,6 +1,11 @@
 import { Entity } from "./entity.js"
 import { constants } from "../constants.js"
 import { Resizeable } from "../utils.js"
+import { Game } from "../core/game.js"
+import { Map } from "../world/map.js"
+import { Tileset } from "../world/tileset.js"
+import { Hitbox } from "./hitbox.js"
+import { Ai } from "./ai.js"
 
 /**
  * @typedef {Object} MobAI
@@ -18,6 +23,20 @@ import { Resizeable } from "../utils.js"
 
 
 export class Mob extends Entity {
+    /**
+     * 
+     * @param {Game} game 
+     * @param {Map} map 
+     * @param {Tileset} tileset 
+     * @param {Hitbox} collision_hitbox 
+     * @param {Hitbox} combat_hitbox 
+     * @param {Number} worldX 
+     * @param {Number} worldY 
+     * @param {Number} animation_duration 
+     * @param {Ai} ai 
+     * @param {Number} life 
+     * @param {{collision: {x: Number, y: Number}, combat: {x: Number, y: Number}}} hitboxes_offset 
+     */
 	constructor(game, map, tileset, collision_hitbox, combat_hitbox, worldX, worldY, animation_duration, ai, life=null, hitboxes_offset = {combat: {x: 0, y: 0}, collision: {x: 0, y: 0}}, bottom_y=null) {
         super(game, map, tileset, collision_hitbox, combat_hitbox, worldX, worldY, animation_duration, life, hitboxes_offset, bottom_y)
         

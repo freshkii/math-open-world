@@ -156,8 +156,8 @@ export class Game {
 		this.map = this.maps[this.current_map]
 
 		// test entities
-		new Spider(this, this.maps["map"], constants.TILE_SIZE * 2, constants.TILE_SIZE * 2)
-		new Frog(this, this.maps["map"], constants.TILE_SIZE * 12, constants.TILE_SIZE * 12, 0.5)
+		new Spider(this, this.maps["new_map"], constants.TILE_SIZE * 45, constants.TILE_SIZE * 45)
+		new Frog(this, this.maps["new_map"], constants.TILE_SIZE * 117, constants.TILE_SIZE * 86)
 
 		const inventory = await Inventory.create(this, "inventory.png")
 		this.player = new Player(this, this.tilesets["Kanji"], inventory)
@@ -644,6 +644,8 @@ export class Game {
 			this.hitboxes.forEach(hitbox => {hitbox.render()})
 			this.talkables.forEach(talkable => {talkable.render()})
 			this.get_current_map().renderGrid()
+			this.ctx.fillStyle = "black"
+			this.ctx.fillText(`x: ${Math.round(this.player.worldX.get())} y: ${Math.round(this.player.worldY.get())}`, 50, 50)
 		}
 
 		if(this.current_ui){
