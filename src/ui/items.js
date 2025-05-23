@@ -40,11 +40,21 @@ export class Consumable extends Item{
      * 
      * @param {Game} game 
      * @param {String} name 
-     * @param {(consumable: Consumable) => void} on_use 
+     * @param {(consumable: Consumable, time: Number) => void} on_use 
      */
-    constructor(game, src, name, on_use){
-        super(game, src, name)
+    constructor(game, name, on_use){
+        super(game, name)
         this.on_use = on_use
+    }
+
+    static async create(game, src, name, on_use){
+        let consumable = new Consumable(game, name, on_use)
+        try{
+            consumable.load(config.IMG_DIR + src)
+        } catch (error){
+            console.error(`Couldn't load file "${src}": ${error.message}`);
+        }
+        return consumable
     }
 }
 
@@ -54,13 +64,12 @@ export class ItemStack{
      * 
      * @param {Item} item 
      * @param {Number} count
-     * @param {type} item_type
      */
-    constructor(item, count, item_type){
+    constructor(item, count){
         this.game = item.game
         this.item = item
         this.count = count
-        this.item_type = item_type /*true=consumable else item*/
+        this.consumable = (item instanceof Consumable)
     }
 
     /**

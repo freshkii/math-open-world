@@ -117,7 +117,7 @@ export class Button extends Widget{
      * @param {Number} width - The button's width
      * @param {Number | YResizeable} height - The button's height
      * @param {Boolean} rendered - Boolean refearing to if this widget should be rendered
-     * @param {(button: Button) => void} command - Command executed when the button is being cliked, the 'button' parameter refers to the actual object, which is being clicked
+     * @param {(button: Button, time: Number) => void} command - Command executed when the button is being cliked, the 'button' parameter refers to the actual object, which is being clicked
      */
     constructor(game, id, x, y, width, height, rendered, command){
         super(game, id, x, y, constants.BUTTON_TYPE, rendered, null)
@@ -127,12 +127,20 @@ export class Button extends Widget{
         else
             this.height = new Resizeable(game, height)
         this.command = command
+        this.should_execute = false
     }
 
     center_arround(x, y){
         this.x.set_value(x - this.width.get() / 2)
         this.y.set_value(y - this.height.get() / 2)
         return this
+    }
+
+    update(current_time){
+        if(this.should_execute){
+            this.command(this, current_time)
+            this.should_execute = false
+        }
     }
 
     render(){
@@ -153,7 +161,7 @@ export class Button extends Widget{
      * @param {Number} [width = null] - The button's width
      * @param {Number} [height = null] - The button's height
      * @param {Boolean} [rendered = null] - Boolean refearing to if this widget should be rendered
-     * @param {(button: Button) => void} [command = null] - Command executed when the button is being cliked, the 'button' parameter refers to the actual object, which is being clicked
+     * @param {(button: Button, time: Number) => void} [command = null] - Command executed when the button is being cliked, the 'button' parameter refers to the actual object, which is being clicked
      */
     update_config(x=null, y=null, width=null, height=null, rendered=null, command=null){
         if(x != null) this.x.set_value(x)

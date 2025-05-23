@@ -2,9 +2,9 @@ import { Entity } from "./entity.js"
 
 export class Effect {
 	/**
-	 * @param {({e:Entity, origin:number, duration:number, last_update:number}) => void} effect
-	 * @param {({e:Entity, origin:number, duration:number, last_update:number}) => void} start
-	 * @param {({e:Entity, origin:number, duration:number, last_update:number}) => void} end
+	 * @param {(entity: {e:Entity, origin:number, duration:number, last_update:number}) => void} effect
+	 * @param {(entity: {e:Entity, origin:number, duration:number, last_update:number}) => void} start
+	 * @param {(entity: {e:Entity, origin:number, duration:number, last_update:number}) => void} end
 	 * @param {Number} update_cooldown - time between each update
 	 */
 	constructor(effect, start, end, update_cooldown) {
