@@ -18,11 +18,8 @@ export class Player extends Entity {
 			game, game.get_current_map(), player_tileset,
 			new Hitbox(game, game.get_current_map(), 400, 400 + constants.TILE_SIZE / 2, 2 * constants.TILE_SIZE / 3, constants.TILE_SIZE / 2, true, true),
 			new Hitbox(game, game.get_current_map(), 400, 400, 2 * constants.TILE_SIZE / 3, constants.TILE_SIZE, false, true),
-			600, 600, 125, null, {combat: {x: 0, y: 0}, collision: {x: 0, y: constants.TILE_SIZE / 4}}
+			600, 600, 125, 100, {combat: {x: 0, y: 0}, collision: {x: 0, y: constants.TILE_SIZE / 4}}
 		)
-
-		this.collision_hitbox.owner = this
-		this.combat_hitbox.owner = this
 
 		this.framesPerState.push(6)
 
@@ -77,8 +74,72 @@ export class Player extends Entity {
 			this.last_dash = this.dash_reset ? 0 : currentTime
 			this.dash_reset = false
 			this.dashing = false
+
 			this.fullSpeed.set_value(constants.TILE_SIZE / 24)
 			this.acceleration.set_value(constants.TILE_SIZE / 64)
+		}
+	
+		if (this.inputHandler.isKeyDown(constants.UP_KEY)) {
+			this.direction = constants.UP_DIRECTION
+			this.dy.set_value(this.dy.get() - this.acceleration.get())
+		}
+		if (this.inputHandler.isKeyDown(constants.DOWN_KEY)) {
+			this.direction = constants.DOWN_DIRECTION
+			this.dy.set_value(this.dy.get() + this.acceleration.get())
+		}
+		if (this.inputHandler.isKeyDown(constants.LEFT_KEY)) {
+			this.direction = constants.LEFT_DIRECTION
+			this.dx.set_value(this.dx.get() - this.acceleration.get())
+		}
+		if (this.inputHandler.isKeyDown(constants.RIGHT_KEY)) {
+			this.direction = constants.RIGHT_DIRECTION
+			this.dx.set_value(this.dx.get() + this.acceleration.get())
+		}
+
+		// ATTACKS
+		if (this.state !== constants.ATTACK_STATE) {
+
+			if (this.inputHandler.isMousePressed(constants.MOUSE_RIGHT_BUTTON)) {
+				const playerWorldX = this.worldX.get()
+				const playerWorldY = this.worldY.get()
+
+				const mouseWorldX = this.game.camera.x.get() + (this.inputHandler.mouse_pos.x + this.game.canvas.width / 2)
+				const mouseWorldY = this.game.camera.y.get() + (this.inputHandler.mouse_pos.y + this.game.canvas.height / 2)
+
+				const dx = mouseWorldX - playerWorldX
+				const dy = mouseWorldY - playerWorldY
+
+				const distance = Math.hypot(dx, dy)
+				if (distance <= 10) return
+				
+			   
+				const speed = 20
+				const velX = (dx / distance) * speed
+				const velY = (dy / distance) * speed
+				
+				const hb = new Hitbox(this.game, this.game.get_current_map(), playerWorldX, playerWorldY,
+					constants.TILE_SIZE / 2, constants.TILE_SIZE / 2, false, false)
+				new ProjectileAttack(this.game, this, this.game.get_current_map(), current_time,
+					2000, [hb], velX, velY,(e) => { e.life -= 2; this.game.effects.BLINK.apply(current_time, e, 200) }, false, this.game.tilesets["Axe"], 50,
+					{x: playerWorldX - hb.width.get() / 2, y: playerWorldY - hb.height.get() /2})
+			}
+
+			let mouse_input = this.inputHandler.isMousePressed(constants.MOUSE_LEFT_BUTTON)
+			if (mouse_input || this.inputHandler.isKeyPressed('a')) {
+				// fancy stuff
+				if (mouse_input) {
+					this.updateDirectionFromMouse()
+				}
+
+				this.game.effects.ATTACK.apply(current_time,this, 300)
+				this.game.effects.MOTIONLESS.apply(current_time, this, 300)
+
+				new SwingingAttack(this.game, this, this.game.get_current_map(), current_time, 300,
+					{x: this.worldX.get(), y: this.worldY.get()}, this.direction,
+					constants.TILE_SIZE/5, constants.TILE_SIZE, constants.TILE_SIZE/2,
+					(e) => { e.life -= 2 ; this.game.effects.BLINK.apply(current_time, e, 200)})
+				this.game.audioManager.playSound('game', 'slash', 0.5)
+      }
 		}
 	}
 
@@ -201,6 +262,7 @@ export class Player extends Entity {
 
 	handleAttackInput(currentTime) {
 		if (this.inputHandler.isMousePressed(constants.MOUSE_RIGHT_BUTTON)) {
+			if (this.remaining_attacks>0){
 			const playerWorldX = this.worldX.get()
 			const playerWorldY = this.worldY.get()
 
@@ -223,8 +285,10 @@ export class Player extends Entity {
 			new ProjectileAttack(this.game, this, this.game.get_current_map(), currentTime,
 				2000, [hb], velX, velY,(e) => { e.life -= 2; this.game.effects.BLINK.apply(currentTime, e, 200) }, false, this.game.tilesets["Axe"], 50,
 				{x: playerWorldX - hb.width.get() / 2, y: playerWorldY - hb.height.get() /2})
+			this.attack_time=currentTime
+			this.remaining_attacks-=1
 
-		}
+		}}
 
 		let mouse_input = this.inputHandler.isMousePressed(constants.MOUSE_LEFT_BUTTON)
 		if (mouse_input || this.inputHandler.isKeyPressed('a')) {

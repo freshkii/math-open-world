@@ -23,12 +23,12 @@ export class Dialogue extends Ui{
             true, 0, fontsize, textcolor, font),
             new Button(game, "new-line-button",
                 - game.canvas.width / 2, new YResizeable(game, - game.canvas.height / 2), game.canvas.width, new YResizeable(game, game.canvas.height),
-                true, (button) => button.ui.next()),
+                true, (button, t) => button.ui.next()),
             new Icon(game, "arrow-icon", game.canvas.width / 9 * 4, new YResizeable(game, game.canvas.height / 9 * 4),
                 arrow_tileset, 1, false, 0)
         ]
 
-        var widgets_states_handler = (dialogue) => {
+        var widgets_states_handler = (dialogue, time) => {
 
         }
 
@@ -124,7 +124,7 @@ export class QuestionDialogue extends Ui {
             true, 0, fontsize, textcolor, font),
             new Button(game, "new-line-button",
                 - game.canvas.width / 2, new YResizeable(game, - game.canvas.height / 2), game.canvas.width, new YResizeable(game, game.canvas.height),
-                true, (button) => button.ui.next()),
+                true, (button, t) => button.ui.next()),
             new Icon(game, "arrow-icon", game.canvas.width / 9 * 4, new YResizeable(game, game.canvas.height / 9 * 4),
                 arrow_tileset, 1, false, 0)
         ]
@@ -141,7 +141,7 @@ export class QuestionDialogue extends Ui {
             widgets.push(
 				new Button(game, "anwser-button-"+i.toString(),
 					anwsers_x, new YResizeable(game, anwsers_y - ((i + 1) * anwsers_height)), anwsers_width, new YResizeable(game, anwsers_height), false,
-					(button) => {
+					(button, t) => {
 						if(!button.has_focus) return
 						if(button.ui.sentence + 1 != button.ui.sentences.length || button.ui.get_widget("dialogue-content").text != button.ui.sentences[button.ui.sentence]) return
 						let anwser_number = parseInt(button.id.split("-").at(-1))
@@ -159,7 +159,7 @@ export class QuestionDialogue extends Ui {
             anwsers_x + anwsers_width - arrow_tileset.screen_tile_size.get(), new YResizeable(game, anwsers_y - ((i + 0.75) * anwsers_height)), arrow_tileset, 4, false, 1))
         }
 
-        var widgets_states_handler = (dialogue) => {
+        var widgets_states_handler = (dialogue, time) => {
             for(let i = 0; i < anwsers.length; i++){
                 if(dialogue.get_widget("anwser-button-"+i.toString()).has_focus){
                     dialogue.get_widget("anwser-arrow-"+i.toString()).rendered = true

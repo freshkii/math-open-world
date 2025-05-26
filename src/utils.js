@@ -92,3 +92,24 @@ export class YResizeable{
 		return this.value * this.game.canvas.height
 	}
 }
+
+/**
+ * 
+ * @param {any} a 
+ * @param {any} b 
+ * @returns {boolean}
+ */
+export const equality_test = (a, b) => {
+	const funct = (a, b) => {
+		if(a instanceof Array){
+			if(a.length == b.lenght) return false
+			for(let i = 0; i < a.length; i++){
+				if(!funct(a[i], b[i])) return false
+			}
+			return true
+		} else {
+			return a === b
+		}
+	}
+	return funct(a, b)
+}

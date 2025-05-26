@@ -121,7 +121,7 @@ export class AnimatedTransition extends Transition{
      * @param {Number} framerate - The duration of one frame
      * @param {Array<Number>} frame_order - The order in which the frame will be rendered
      * @param {Transition} background - The transition used as a background for this one
-     * @param {(t: any) => void} [on_end=(t) => {}] - The function executed when the transition is finished, allows for scripts or ui to follow
+     * @param {(t: AnimatedTransition) => void} [on_end=(t) => {}] - The function executed when the transition is finished, allows for scripts or ui to follow
      */
     constructor(game, duration, tileset, framerate, frame_order, background, on_end=(t) => {}){
         super(game, duration, on_end)

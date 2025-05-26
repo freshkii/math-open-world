@@ -53,7 +53,9 @@ export const constants = {
 	WANDERING_AI_STATE: 0,
 	STILL_AI_STATE: 1,
 	CHASING_AI_STATE: 2,
+    HEALTH_COLORS:['red', 'orange', 'green']
 }
+
 
 // The future has arrived
 // the format is
@@ -84,7 +86,7 @@ export const collisions = {
         55: {y: -8, height: 96}
     },
 	"new_map.json": {
-		169: {width: 0, height: 1},
+		169: {width: 0, height: 0},
 		76: { x: 20, y: 90, width: 76, height: 22},
         113: {x: 22, y: 75, width: 85, height: 25},
         114: {x: 32, width: 64, height: 112},
@@ -101,7 +103,8 @@ export const collisions = {
 		684: {x:40,y:56, width:48},
 		685: {y:56, height:32},
 		723: {x:40, y:32, height:80, width:48}
-	}
+	},
+	"map_multi_ts.json": {}
 }
 
 
@@ -139,5 +142,6 @@ export const blockDepthOrder = {
         171,
         114,
         76  
-	]
+	],
+	"map_multi_ts.json": []
 }

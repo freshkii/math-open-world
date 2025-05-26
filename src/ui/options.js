@@ -15,7 +15,7 @@ export class OptionsMenu extends Ui{
                 "Debug:", true, 1, constants.TILE_SIZE / 3),
             new Button(game, "debug-option-button", 0, 0,
                 constants.TILE_SIZE / 2, constants.TILE_SIZE / 2, true,
-                button => {
+                (button, t) => {
 					button.ui.game.audioManager.playSound('menu', 'click')
                     this.debug = !this.debug
                     let checkbox = button.ui.get_widget("debug-option-checkbox-icon")
@@ -29,7 +29,7 @@ export class OptionsMenu extends Ui{
             new Label(game, "music-volume-label", -constants.TILE_SIZE * 2, -constants.TILE_SIZE / 2.5,
                 "Music Volume", true, 0, constants.TILE_SIZE / 3),
             new Button(game, "music-volume-button", 0, 0,
-                constants.TILE_SIZE / 2, constants.TILE_SIZE / 2, true, (b) => {
+                constants.TILE_SIZE / 2, constants.TILE_SIZE / 2, true, (b, t) => {
 					b.ui.game.audioManager.playSound('menu', 'click')
 				})
                 .center_arround(constants.TILE_SIZE * 1.5, 0),
@@ -39,14 +39,14 @@ export class OptionsMenu extends Ui{
             new Label(game, "sound-effect-volume-label", -constants.TILE_SIZE * 2, constants.TILE_SIZE / 1.5,
                 "Sound Effects Volume", true, 0, constants.TILE_SIZE / 3),
             new Button(game, "sound-effects-volume-button", 0, 0,
-                constants.TILE_SIZE / 2, constants.TILE_SIZE / 2, true, (b) => {
+                constants.TILE_SIZE / 2, constants.TILE_SIZE / 2, true, (b, t) => {
 					b.ui.game.audioManager.playSound('menu', 'click')
 				})
                 .center_arround(constants.TILE_SIZE * 1.5, constants.TILE_SIZE),
             new Icon(game, "sound-effects-volume-cursor-icon", 0, 0,
                 game.tilesets["selection_cursor"], 1, true, 1)
                 .center_arround(constants.TILE_SIZE * 1.5, constants.TILE_SIZE)
-        ], ui => {
+        ], (ui, t) => {
             let music_volume_button = ui.get_widget("music-volume-button")
             let sound_effects_volume_button = ui.get_widget("sound-effects-volume-button")
             if(music_volume_button.is_hovered || music_volume_button.is_clicked)

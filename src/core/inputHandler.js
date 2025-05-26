@@ -76,7 +76,7 @@ export class InputHandler {
                             && widget.y.get() <= this.mouse_pos.y
                             && (widget.y.get() + widget.height.get()) >= this.mouse_pos.y){
                             if(widget.type == constants.BUTTON_TYPE) {
-                                widget.command(widget)
+                                widget.should_execute = true
                                 new_focused_widgets.push(widget)
                             }
                             else if(widget.type == constants.TEXTAREA_TYPE || widget.type == constants.NUMBERAREA_TYPE){

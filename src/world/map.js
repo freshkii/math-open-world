@@ -8,13 +8,12 @@ export class Map {
 	/**
 	 * !!! One shouldn't use the constructor to make a map, use the static create method instead
 	 * @param {Game} game - The current game
-	 * @param {Tileset} tileset - The tileset used to render the map
 	 * @param {String} background - The color of the tileless background
 	 * @param {{x: Number, y: Number}} player_pos - The position of the player on this specific map
 	 */
-	constructor(game, tileset, background, player_pos) {
+	constructor(game, background, player_pos) {
 		this.game = game
-		this.tileset = tileset
+		this.tilesets = []
 		this.ground = []
 		this.blocks = []
 		this.perspective = []
@@ -31,13 +30,12 @@ export class Map {
 	 * A scenery on which are put other objects (entities, hitboxes, ...). This method is async and static
 	 * @param {Game} game - The current game
 	 * @param {String} src - The path to the json file used as a reference to layout the map
-	 * @param {Tileset} tileset - The tileset used to render the map
 	 * @param {String} background - The color of the tileless background
 	 * @param {{x: Number, y: Number}} player_pos - The position of the player on this specific map
 	 * @returns {Promise<Map>}
 	 */
-	static async create(game, src, tileset, background, player_pos) {
-		const map = new Map(game, tileset, background, player_pos)
+	static async create(game, src, background, player_pos) {
+		const map = new Map(game, background, player_pos)
 		await map.load(src)
 		//try {
 			//await map.load(src)
@@ -75,9 +73,7 @@ export class Map {
 
 		for(let tile_num of Object.keys(this.animated_tiles)){
 			tile_num = parseInt(tile_num)
-			if(this.animated_tiles[tile_num].tileset.path == "current")
-				this.animation_tilesets[tile_num] = this.tileset
-			else if(!isNaN(this.animated_tiles[tile_num].tileset.path))
+			if(!isNaN(this.animated_tiles[tile_num].tileset.path))
 				this.animation_tilesets[tile_num] = this.animation_tilesets[parseInt(this.animated_tiles[tile_num].tileset.path)]
 			else
 				this.animation_tilesets[tile_num] = await Tileset.create(this.game,
@@ -131,6 +127,12 @@ export class Map {
 		// create a border around the map to prevent glitches
 		new Hitbox(this.game, this, 0, 0, this.world.width.get(), this.world.height.get())
 
+		for (const tileset of body.tilesets) {
+			if (!this.game.tilesets[tileset.source]) {
+				throw new Error(`Tileset ${tileset.source} not loaded`)
+			}
+			this.tilesets.push(tileset)
+		}
 	}
 
 	/**
@@ -229,7 +231,7 @@ export class Map {
 				for (const layer of this.blocks) {
 					const tileNum = layer.data[y * this.width + x]
 					if (tileNum && !(this.src in collisions && tileNum in collisions[this.src])) {
-						this.tileset.drawTile(tileNum, screenX, screenY)
+						this.renderTile(tileNum, screenX, screenY)
 					}
 				}
 			}
@@ -248,7 +250,7 @@ export class Map {
 				for (const layer of this.perspective) {
 					const tileNum = layer.data[y * this.width + x]
 					if (tileNum) {
-						this.tileset.drawTile(tileNum, screenX, screenY)
+						this.renderTile(tileNum, screenX, screenY)
 					}
 				}
 			}
@@ -267,7 +269,9 @@ export class Map {
 			const frame = this.animated_tiles[tileNum].frameorder[frameIndex]
 			this.animation_tilesets[tileNum]?.drawTile(frame, screenX, screenY)
 		} else {
-			this.tileset.drawTile(tileNum, screenX, screenY)
+			const ts = this.getTileset(tileNum)
+			if (!ts) return
+			this.game.tilesets[ts.source].drawTile(tileNum - ts.firstgid + 1, screenX, screenY)
 		}
 	}
 
@@ -298,5 +302,11 @@ export class Map {
 		}
 
 		this.game.ctx.stroke()
+	}
+
+	getTileset(tileNum) {
+		for (let i = this.tilesets.length-1;i >= 0; i--) {
+			if (tileNum >= this.tilesets[i].firstgid) return this.tilesets[i]
+		}
 	}
 }

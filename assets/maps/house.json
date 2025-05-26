@@ -98,7 +98,7 @@
     "tilesets":[
         {
             "firstgid":1,
-            "source":"..\/sprites\/roguelikeSheet_transparent.tsx"
+            "source":"cabane_tileset"
         }],
     "tilewidth":16,
     "type":"map",
