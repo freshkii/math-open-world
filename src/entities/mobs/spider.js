@@ -79,7 +79,7 @@ export class Spider extends Mob {
         const dy = this.game.player.worldY.get() - this.worldY.get()
         const distance = Math.max(1, Math.hypot(dx, dy))
         
-        const speed = this.ai.others.projectile_speed.get()
+        const speed = this.ai.projectile_speed.get()
         return [
             dx / distance * speed,
             dy / distance * speed

@@ -24,8 +24,6 @@ export class Ai{
         this.attack_cooldown = null
         this.attack_range = null
         this.last_attack = null
-
-        this.others = null
     }
 
     /**
@@ -77,7 +75,9 @@ export class Ai{
      * @returns {Ai}
      */
     set_others(others){
-        this.others = others
+        for(let [key, value] of Object.entries(others)){
+            this[key] = value
+        }
         return this
     }
 }
