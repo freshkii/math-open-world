@@ -80,6 +80,14 @@ export class Label extends Widget{
                     3, 0, Math.PI * 2)
                 this.game.ctx.fillStyle = "blue"
                 this.game.ctx.fill()
+                
+                this.game.ctx.strokeStyle = "blue"
+                this.game.ctx.strokeRect(
+                    this.game.canvas.width / 2 + this.x.get(),
+                    this.game.canvas.height / 2 + this.y.get() - this.fontsize.get() / 2,
+                    this.text.length * this.fontsize.get() / 2,
+                    this.fontsize.get()
+                )
             }
         }
     }
@@ -331,6 +339,15 @@ export class Icon extends Widget{
                 this.tile_nb,
                 this.game.canvas.width / 2 + this.x.get(),
                 this.game.canvas.height / 2 + this.y.get())
+            if(this.game.options_menu.debug){
+                this.game.ctx.strokeStyle = "blue"
+                this.game.ctx.strokeRect(
+                    this.game.canvas.width / 2 + this.x.get(),
+                    this.game.canvas.height / 2 + this.y.get(),
+                    this.tileset.screen_tile_size.get(),
+                    this.tileset.screen_tile_size.get()
+                )
+            }
         }
     }
 
