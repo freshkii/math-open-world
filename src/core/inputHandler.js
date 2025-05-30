@@ -85,23 +85,26 @@ export class InputHandler {
                         }
                     }
                 })
-                if(new_focused_widgets.length == 0){
+                game.plan(() => {
+                    if(!game.current_ui) return
+                    if(new_focused_widgets.length == 0){
                     game.current_ui.focused_widgets.forEach(widget => {
                         widget.has_focus = false
                     })
                     game.current_ui.focused_widgets = []
-                } else {
-                    if(game.current_ui.focused_widgets){
-                        game.current_ui.focused_widgets.forEach(widget => {
-                            widget.has_focus = false
+                    } else {
+                        if(game.current_ui.focused_widgets){
+                            game.current_ui.focused_widgets.forEach(widget => {
+                                widget.has_focus = false
+                            })
+                        }
+                        game.current_ui.focused_widgets = []
+                        new_focused_widgets.forEach(widget => {
+                            game.current_ui.focused_widgets.push(widget)
+                            widget.has_focus = true
                         })
                     }
-                    game.current_ui.focused_widgets = []
-                    new_focused_widgets.forEach(widget => {
-                        game.current_ui.focused_widgets.push(widget)
-                        widget.has_focus = true
-                    })
-                }
+                }, 100)
             }
 
         })

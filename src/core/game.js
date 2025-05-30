@@ -148,6 +148,9 @@ export class Game {
 				}
 			)
 		}
+
+		/**@type {Array<{command: () => void, delay: Number, activation_time: Number}>} */
+		this.planned = []
 	}
 
 	async run() {
@@ -609,6 +612,14 @@ export class Game {
 	 * @returns 
 	 */
 	update(current_time) {
+		this.planned.filter(command => command.activation_time==null).forEach(command => command.activation_time = current_time + command.delay)
+		this.planned.forEach(command => {
+			if(command.activation_time < current_time){
+				command.command()
+				this.planned.splice(this.planned.indexOf(command), 1)
+			}
+		})
+		console.log(this.planned)
 		this.collision_hitboxes = this.collision_hitboxes.filter(h => h.active)
 		this.combat_hitboxes = this.combat_hitboxes.filter(h => h.active)
 		this.hitboxes = this.hitboxes.filter(h => h.active)
@@ -708,5 +719,15 @@ export class Game {
 	 */
 	get_current_map(){
 		return this.maps[this.current_map]
+	}
+
+	/**
+	 * Allows to plan out command to be executed after a certain amount of time,
+	 * ⚠ make sure that the values that you use in the command still exist after that amount of time
+	 * @param {() => void} command 
+	 * @param {number} delay 
+	 */
+	plan(command, delay){
+		this.planned.push({command: command, delay: delay, activation_time: null})
 	}
 }
