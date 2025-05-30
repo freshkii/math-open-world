@@ -619,7 +619,6 @@ export class Game {
 				this.planned.splice(this.planned.indexOf(command), 1)
 			}
 		})
-		console.log(this.planned)
 		this.collision_hitboxes = this.collision_hitboxes.filter(h => h.active)
 		this.combat_hitboxes = this.combat_hitboxes.filter(h => h.active)
 		this.hitboxes = this.hitboxes.filter(h => h.active)
