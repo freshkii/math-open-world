@@ -253,7 +253,7 @@ export class Inventory extends Ui{
      */
     get_next_empty_slot(item){
         for(let i = 0; i < 9; i++){
-            if(this.get_slot(i) != null && this.get_slot(i).item == item) return i
+            if(this.get_slot(i)?.item == item) return i
         }
         for(let i = 0; i < 9; i++){
             if(this.get_slot(i) == null) return i
@@ -294,27 +294,24 @@ export class Inventory extends Ui{
 
     /**
      * 
-     * @param {Array<ItemStack>} itemstacks 
+     * @param {ItemStack} itemstack 
      */
-    add_items(itemstacks){
-        for(let n = 0; n < itemstacks.length; n++){
-            let itemstack = itemstacks[n]
-            var slot = this.get_next_empty_slot(itemstack.item)
-            this.get_widget(`item-texture-${slot}`).img = this.game.items[itemstack.item.name].img
-            this.get_widget(`item-texture-${slot}`).rendered = true
-            if(this.get_slot(n) != null && this.get_slot(n).item == itemstack.item){
-                this.get_slot(n).add_count(itemstack.count)
-            }else{
-                this.set_slot(slot, itemstack)
-            }
-            let countLabel = this.get_widget(`item-count-${slot}`);
-            countLabel.text = itemstack.count.toString();
-            if (itemstack.consumable && itemstack.count >= 1) {
-                countLabel.rendered = true;
-            }
-            else {
-                countLabel.rendered = false;
-            }
+    add_items(itemstack){
+        var slot = this.get_next_empty_slot(itemstack.item)
+        this.get_widget(`item-texture-${slot}`).img = this.game.items[itemstack.item.name].img
+        this.get_widget(`item-texture-${slot}`).rendered = true
+        if(this.get_slot(slot) != null && this.get_slot(slot).item == itemstack.item){
+            this.get_slot(slot).add_count(itemstack.count)
+        }else{
+            this.set_slot(slot, itemstack)
+        }
+        let countLabel = this.get_widget(`item-count-${slot}`);
+        countLabel.text = itemstack.count.toString();
+        if (itemstack.consumable && itemstack.count >= 1) {
+            countLabel.rendered = true;
+        }
+        else {
+            countLabel.rendered = false;
         }
     }
 

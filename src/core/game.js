@@ -225,19 +225,19 @@ export class Game {
 			(c, time) => {this.effects.SPEED2.apply(time, this.player, 10000)}
 		)
 		const test_consumable_stack = new ItemStack(test_consumable, 1)
-		inventory.add_items([test_consumable_stack])
+		inventory.add_items(test_consumable_stack)
 		
 		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
 			//this.effects.BIG_HITBOX.apply(time, this.player, 100)
 		})).set_tooltip("This ring make a barrier arround you that allows you to touch ou be touched from further away")
 		const test_item_stack = new ItemStack(test_item, 1)
-		inventory.add_items([test_item_stack])
+		inventory.add_items(test_item_stack)
 
 		const test_consumable2 = (await Consumable.create(this, "Item_Black3.png", "Speed Potion",
 			(c, time) => {this.effects.SPEED1.apply(time, this.player, 10000)}
 		)).set_tooltip("Drinking this potion makes you faster for a certain period")
 		const test_consumable_stack2 = new ItemStack(test_consumable2, 5)
-		inventory.add_items([test_consumable_stack2])
+		inventory.add_items(test_consumable_stack2)
 
 		const colors_problem = await Problem.create(
 			this, "book_ui.png", this.canvas.width * 0.34375, this.canvas.width * 0.453125, "colors",
