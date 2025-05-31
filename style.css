@@ -1,12 +1,145 @@
 html, body {
     padding: 0;
     margin: 0;
-    overflow: hidden;
-    pointer-events: none;
+    height: 100%;
+    background: #181d25;
+    font-family: 'Orbitron', Arial, sans-serif;
 }
 
-canvas {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-	will-change: transform;
+#home-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: url('assets/images/background.jpg') center/cover no-repeat, #181d25;
+}
+
+.title-3d {
+    font-size: 5em;
+    color: #fff;
+    margin-bottom: 1em;
+    text-shadow:
+        0 2px 8px #222,
+        0 4px 16px #ffd600;
+    letter-spacing: 2px;
+    font-family: 'Orbitron', Arial, sans-serif;
+    text-align: center;
+}
+
+#account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    background: rgba(107, 165, 235, 0.08); 
+    padding: 3em 3.5em;
+    border-radius: 18px;
+    border: 2px solid #ffd600; 
+    box-shadow: 0 4px 24px #000a;
+    align-items: center;
+    margin-bottom: 1.5em;
+    backdrop-filter: blur(4px); 
+}
+
+
+#account-form input {
+    width: 220px;
+    padding: 0.7em 1em;
+    border-radius: 8px;
+    border: 1px solid #ffd600;
+    background: #181d25;
+    color: #fff;
+    font-size: 1.1em;
+    font-family: 'Orbitron', Arial, sans-serif;
+    outline: none;
+    transition: border 0.2s;
+}
+#account-form input:focus {
+    border: 1.5px solid #fff700;
+}
+
+#play-btn {
+    width: 100%;
+    font-size: 1.2em;
+    padding: 0.7em 0;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(90deg, #ffd600 60%, #fff700 100%);
+    color: #232b3a;
+    font-weight: bold;
+    box-shadow: 0 2px 12px #222;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+    font-family: 'Orbitron', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+#play-btn:hover, #play-btn:focus {
+    background: linear-gradient(90deg, #fff700 0%, #ffd600 100%);
+    color: #181d25;
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 24px #ffd600;
+    outline: none;
+}
+
+.info-btn {
+    margin-top: 0.5em;
+    background: none;
+    border: none;
+    color: #ffd600;
+    font-size: 1em;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: 'Orbitron', Arial, sans-serif;
+    transition: color 0.2s;
+}
+.info-btn:hover {
+    color: #fff700;
+}
+
+#info-popup.popup {
+    position: fixed;
+    left: 50%;
+    bottom: 40px;
+    top: auto;
+    transform: translateX(-50%);
+    background: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+    display: flex;
+}
+#info-popup .popup-content {
+    background: #232b3a;
+    color: #fff;
+    padding: 2em 3em 2em 3em;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px #000a;
+    position: relative;
+    max-width: 350px;
+    text-align: center;
+    font-size: 1.08em;
+}
+#info-popup .close {
+    position: absolute;
+    top: 8px; right: 16px;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+#logout-btn {
+    width: 100%;
+    font-size: 1em;
+    padding: 0.5em 0;
+    border-radius: 8px;
+    border: 1px solid #ffd600;
+    background: #232b3a;
+    color: #ffd600;
+    font-family: 'Orbitron', Arial, sans-serif;
+    cursor: pointer;
+    margin-top: 0.5em;
+    transition: background 0.2s, color 0.2s;
+}
+#logout-btn:hover {
+    background: #ffd600;
+    color: #232b3a;
 }
