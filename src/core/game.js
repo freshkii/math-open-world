@@ -19,7 +19,7 @@ import { Spider } from '../entities/mobs/spider.js'
 import { OptionsMenu } from '../ui/options.js'
 import { AudioManager } from './audioManager.js'
 import { Inventory } from '../ui/inventory.js'
-import { Consumable, Item, ItemStack} from '../ui/items.js'
+import { Consumable, Item, ItemStack, Passive} from '../ui/items.js'
 
 
 export class Game {
@@ -97,47 +97,56 @@ export class Game {
 		this.options_menu = null
 		
 		this.effects = {
-			MOTIONLESS: new Effect((entity) => {
-				entity.e.fullSpeed = entity.new_fullSpeed
-				entity.e.direction = entity.direction
-			}, (entity) => {
-				entity.direction = entity.e.direction
-				entity.fullSpeed = entity.e.fullSpeed
-				if(entity.e.dashing)
-					entity.fullSpeed.set_value(constants.TILE_SIZE / 12)
-				entity.new_fullSpeed = new Resizeable(this, 0)
+			MOTIONLESS: new Effect(instance => {
+				instance.entity.fullSpeed = instance.new_fullSpeed
+				instance.entity.direction = instance.direction
+			}, instance => {
+				instance.direction = instance.entity.direction
+				instance.fullSpeed = instance.entity.fullSpeed
+				if(instance.entity.dashing)
+					instance.fullSpeed.set_value(constants.TILE_SIZE / 12)
+				instance.new_fullSpeed = new Resizeable(this, 0)
 
-				entity.e.fullSpeed = entity.new_fullSpeed
-				entity.e.direction = entity.direction
-			}, (entity) => {
-				entity.e.fullSpeed = entity.fullSpeed
-				entity.e.direction = entity.direction
+				instance.entity.fullSpeed = instance.new_fullSpeed
+				instance.entity.direction = instance.direction
+			}, instance => {
+				instance.entity.fullSpeed = instance.fullSpeed
+				instance.entity.direction = instance.direction
 			}, 0),
-			ATTACK: new Effect((e) => {}, (entity) => {
-				entity.state = entity.e.state
-				entity.e.state = constants.ATTACK_STATE
-			}, (entity) => {
-				entity.e.state = entity.state
+			ATTACK: new Effect(instance => {}, instance => {
+				instance.state = instance.entity.state
+				instance.entity.state = constants.ATTACK_STATE
+			}, instance => {
+				instance.entity.state = instance.state
 			}, 1000),
-			BLINK: new Effect((e) => {}, (entity) => {
-				entity.map = entity.e.map, entity.e.map = null
-			}, (entity) => {
-				entity.e.map = entity.map
+			BLINK: new Effect(instance => {}, instance => {
+				instance.map = instance.entity.map, instance.entity.map = null
+			}, instance => {
+				instance.entity.map = instance.map
 			}, 0),
-			SPEED1: new Effect((entity) => {
-				entity.e.fullSpeed.set_value(constants.TILE_SIZE / 6)
-			}, (entity) => {
-				entity.speed_before = entity.e.fullSpeed.get()
-			}, (entity) => {
-				entity.e.fullSpeed.set_value(entity.speed_before)
+			SPEED1: new Effect(instance => {
+				instance.entity.fullSpeed.set_value(constants.TILE_SIZE / 6)
+			}, instance => {
+				instance.speed_before = instance.entity.fullSpeed.get()
+			}, instance => {
+				instance.entity.fullSpeed.set_value(instance.speed_before)
 			}, 0),
-			SPEED2: new Effect((entity) => {
-				entity.e.fullSpeed.set_value(constants.TILE_SIZE / 4)
-			}, (entity) => {
-				entity.speed_before = entity.e.fullSpeed.get()
-			}, (entity) => {
-				entity.e.fullSpeed.set_value(entity.speed_before)
-			}, 0)
+			SPEED2: new Effect(instance => {
+				instance.entity.fullSpeed.set_value(constants.TILE_SIZE / 4)
+			}, instance => {
+				instance.speed_before = instance.entity.fullSpeed.get()
+			}, instance => {
+				instance.entity.fullSpeed.set_value(instance.speed_before)
+			}, 0),
+			BIG_HITBOX: new Effect(instance => {},
+				instance => {
+					instance.entity.collision_hitbox.width.set_value(instance.entity.collision_hitbox.width.get() * 1.49)
+					instance.entity.collision_hitbox.height.set_value(instance.entity.collision_hitbox.height.get() * 1.49)
+				}, instance => {
+					instance.entity.collision_hitbox.width.set_value(instance.entity.collision_hitbox.width.get() / 1.49)
+					instance.entity.collision_hitbox.height.set_value(instance.entity.collision_hitbox.height.get() / 1.49)
+				}
+			)
 		}
 	}
 
@@ -165,6 +174,8 @@ export class Game {
 		await Tileset.create(this, "selection_cursor.png", 16, constants.TILE_SIZE / 2, 0)
 		await Tileset.create(this, "checkbox_tileset.png", 32, constants.TILE_SIZE / 2, 0)
 		await Tileset.create(this, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
+		await Tileset.create(this, "inventory_tooltip_tileset.png", 16, constants.TILE_SIZE / 4, 0)
+
 		await Tileset.create(this, "firefly.png", 16, constants.TILE_SIZE, 0)
 
 		await Map.create(this, 'house.json', "black", {x: constants.TILE_SIZE * 1.5, y: 3 * constants.TILE_SIZE})
@@ -181,6 +192,7 @@ export class Game {
 		new Frog(this, this.maps["map"], constants.TILE_SIZE * 12, constants.TILE_SIZE * 12, 0.5)
 
 		const inventory = await Inventory.create(this, "inventory.png")
+		this.inventory_unlocked = false
 		this.player = new Player(this, this.tilesets["Kanji"], inventory)
 
 		const draggable = new Entity(
@@ -211,20 +223,24 @@ export class Game {
 
 		const black_transition = new UnicoloreTransition(this, 500, "black")
 
-		const test_consumable = await Consumable.create(this, "Item_71.png", "example_item",
+		const test_consumable = await Consumable.create(this, "Item_71.png", "Feather",
 			(c, time) => {this.effects.SPEED2.apply(time, this.player, 10000)}
 		)
-		const test_consumable_stack = new ItemStack(test_consumable, 1);
+    
+		const test_consumable_stack = new ItemStack(test_consumable, 1)
 		inventory.add_items([test_consumable_stack])
 		
-		const test_item = await Item.create(this, "Item_51.png", "example_item");
-		const test_item_stack = new ItemStack(test_item, 1);
+		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
+			this.effects.BIG_HITBOX.apply(time, this.player, 100)
+		})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
+		const test_item_stack = new ItemStack(test_item, 1)
+
 		inventory.add_items([test_item_stack])
 
-		const test_consumable2 = await Consumable.create(this, "Item_Black3.png", "example_item",
+		const test_consumable2 = (await Consumable.create(this, "Item_Black3.png", "Speed Potion",
 			(c, time) => {this.effects.SPEED1.apply(time, this.player, 10000)}
-		);
-		const test_consumable_stack2 = new ItemStack(test_consumable2, 5);
+		)).set_tooltip("Drinking this potion makes you faster for a certain period")
+		const test_consumable_stack2 = new ItemStack(test_consumable2, 5)
 		inventory.add_items([test_consumable_stack2])
 
 		const colors_problem = await Problem.create(
@@ -316,6 +332,7 @@ export class Game {
 					numberarea_pink.usable = false
 					numberarea_blue.usable = false
 					numberarea_red.usable = false
+					this.inventory_unlocked = true
 					problem.unfocus()
 				}	
 			}
@@ -671,7 +688,7 @@ export class Game {
 		this.collision_hitboxes = this.collision_hitboxes.filter(h => h.active)
 		this.combat_hitboxes = this.combat_hitboxes.filter(h => h.active)
 		this.hitboxes = this.hitboxes.filter(h => h.active)
-		this.entities = this.entities.filter(e => e.active)
+		this.entities = this.entities.filter(entity => entity.active)
 
 		if(this.current_ui) {
 			if(this.current_ui.is_finished){

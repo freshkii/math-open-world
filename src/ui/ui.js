@@ -28,6 +28,7 @@ export class Ui {
         /** @type {Array<Widget>} */
         this.widgets = widgets
         this.sort_widgets()
+        /** @type {Array<String>} */
         this.ids = []
         this.widgets.forEach((widget) => {
             if(this.ids.includes(widget.id))
