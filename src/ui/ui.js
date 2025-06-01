@@ -171,6 +171,7 @@ export class UiPrototype {
         }
         else
             console.error(`no such widget ${id} in this ui`)
+            console.log(this)
     }
 
     sort_widgets(){

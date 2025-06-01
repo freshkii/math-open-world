@@ -163,9 +163,7 @@ export class Player extends Entity {
 		}
 
 		if (this.game.inputHandler.isKeyPressed("e") && this.game.inventory_unlocked) {
-            if (this.game.current_ui === this.inventory) {
-                this.game.current_ui = null;
-            } else if (!this.game.current_ui) {
+            if (!this.game.current_ui) {
                 this.game.current_ui = this.inventory;
             }
         }

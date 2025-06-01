@@ -14,6 +14,7 @@ export class Item{
         this.game.items[name] = this
         /** @type {Array<String>} */
         this.tooltip = null
+        this.max_count = 99
     }
 
     static async create(game, src, name){
@@ -44,6 +45,11 @@ export class Item{
      */
     set_tooltip(tooltip){
         this.tooltip = slice(tooltip, 35)
+        return this
+    }
+
+    set_max_count(count){
+        this.max_count = count
         return this
     }
 }
@@ -131,6 +137,7 @@ export class ItemStack{
      */
     add_count(n){
         if(this.count < -n) console.error("Negative item count")
+        if(this.count + n > this.item.max_count) return 
         this.count += n
     }
 }

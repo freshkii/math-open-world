@@ -559,8 +559,8 @@ export class Window extends Widget{
             if(this.game.options_menu.debug){
                 this.game.ctx.strokeStyle = "green"
                 this.game.ctx.strokeRect(
-                    this.x.get() + this.ui.x_center.get() + this.game.canvas.width / 2,
-                    this.y.get() + this.ui.y_center.get() + this.game.canvas.height / 2,
+                    this.x.get() + this.game.canvas.width / 2,
+                    this.y.get() + this.game.canvas.height / 2,
                     this.window_ui.width.get(),
                     this.window_ui.height.get()
                 )
@@ -597,10 +597,12 @@ export class Window extends Widget{
         if(x != null) {
             this.x.set_value(x)
             this.window_ui.x.set_value(x)
+            this.window_ui.x_center.set_value(this.window_ui.width.get() / 2 + this.x.get())
         }
         if(y != null){
             this.y.set_value(y)
             this.window_ui.y.set_value(y)
+            this.window_ui.y_center.set_value(this.window_ui.height.get() / 2 + this.y.get())
         }
         if(rendered != null) this.rendered = rendered
         if(layer != null) this.layer = layer
