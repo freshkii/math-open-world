@@ -614,7 +614,7 @@ export class Game {
 	update(current_time) {
 		this.planned.filter(command => command.activation_time==null).forEach(command => command.activation_time = current_time + command.delay)
 		this.planned.forEach(command => {
-			if(command.activation_time < current_time){
+			if(command.activation_time <= current_time){
 				command.command()
 				this.planned.splice(this.planned.indexOf(command), 1)
 			}
@@ -665,8 +665,6 @@ export class Game {
 		Object.values(this.effects).forEach(effect => effect.update(current_time))
 
 		this.talkables.forEach(talkable => {talkable.update()})
-
-		this.player.inventory.update(current_time)
 	}
 
 	render() {

@@ -145,9 +145,25 @@ export class Button extends Widget{
     }
 
     update(current_time){
-        if(this.should_execute){
+        if(!this.rendered) return
+        let x = this.game.inputHandler.mouse_pos.x
+        let y = this.game.inputHandler.mouse_pos.y
+        if(this.x.get() <= x && (this.x.get() + this.width.get()) >= x && this.y.get() <= y && (this.y.get() + this.height.get()) >= y){
+            this.is_hovered = true
+            if(this.game.inputHandler.isMouseDown(0) || this.game.inputHandler.isMouseDown(2)){
+                this.is_clicked = true
+                if(this.game.inputHandler.isMousePressed(0) || this.game.inputHandler.isMousePressed(2))
             this.command(this, current_time)
-            this.should_execute = false
+                    this.has_focus = true
+                    this.ui.focused_widgets.push(this)
+            } else {
+                this.is_clicked = false
+            }
+        } else {
+            this.is_hovered = false
+            if(this.game.inputHandler.isMouseDown(0) || this.game.inputHandler.isMouseDown(2))
+                this.has_focus = false
+                this.ui.focused_widgets.splice(this.ui.focused_widgets.indexOf(this), 1)
         }
     }
 
@@ -243,7 +259,45 @@ export class TextArea extends Widget{
         }
     }
 
+    // Overriden in the numberareas
+    check_char(char){return true}
+
     update(current_time){
+        if(!this.rendered) return
+        let x = this.game.inputHandler.mouse_pos.x
+        let y = this.game.inputHandler.mouse_pos.y
+        if(this.x.get() <= x && (this.x.get() + this.width.get()) >= x && this.y.get() <= y && (this.y.get() + this.height.get()) >= y){
+            this.is_hovered = true
+            if(this.game.inputHandler.isMouseDown(0) || this.game.inputHandler.isMouseDown(2)){
+                this.is_clicked = true
+                if(this.game.inputHandler.isMousePressed(0) || this.game.inputHandler.isMousePressed(2))
+                    this.has_focus = true
+                    this.ui.focused_widgets.push(this)
+            } else {
+                this.is_clicked = false
+            }
+        } else {
+            this.is_hovered = false
+            if(this.game.inputHandler.isMouseDown(0) || this.game.inputHandler.isMouseDown(2))
+                this.has_focus = false
+                this.ui.focused_widgets.splice(this.ui.focused_widgets.indexOf(this), 1)
+        }
+
+        if(this.has_focus && this.usable){
+            let key = this.game.inputHandler.get_down_keys()
+            if(key != null){
+                if(key.length == 1){
+                    if(this.content.length < this.max_char_number){
+                        if(this.check_char(key))
+                            this.content += key
+                    }
+                }else {
+                    if(key == "backspace")
+                        this.content = this.content.length !=0? this.content.slice(0, -1): ""
+                }
+            }
+        }
+
         if(this.has_focus){
             if(this.last_blink + 500 < current_time){
                 if(this.has_bar) this.has_bar = false
@@ -283,6 +337,10 @@ export class TextArea extends Widget{
         if(font != null) this.font = font
         if(blink_bar != null) this.blink_bar = blink_bar
         if(usable != null) this.usable = usable
+    }
+
+    check_char(char){
+        return ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(char)
     }
 }
 
