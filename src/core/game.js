@@ -120,7 +120,8 @@ export class Game {
 				instance.entity.state = instance.state
 			}, 1000),
 			BLINK: new Effect(instance => {}, instance => {
-				instance.map = instance.entity.map, instance.entity.map = null
+				instance.map = instance.entity.map
+				instance.entity.map = null
 			}, instance => {
 				instance.entity.map = instance.map
 			}, 0),
@@ -138,6 +139,7 @@ export class Game {
 			}, instance => {
 				instance.entity.fullSpeed.set_value(instance.speed_before)
 			}, 0),
+			// Just so you know, that's just a joke/test huh
 			BIG_HITBOX: new Effect(instance => {},
 				instance => {
 					instance.entity.collision_hitbox.width.set_value(instance.entity.collision_hitbox.width.get() * 1.49)
@@ -233,6 +235,7 @@ export class Game {
 		inventory.add_items(test_consumable_stack)
 		
 		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
+			// Totally temporary
 			this.effects.BIG_HITBOX.apply(time, this.player, 100)
 		})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
 		const test_item_stack = new ItemStack(test_item, 1)
