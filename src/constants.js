@@ -23,6 +23,16 @@ export const constants = {
     NUMBERAREA_TYPE: "numberarea",
     ICON_TYPE: "icon",
     TEXTURE_TYPE: "texture",
+    WINDOW_TYPE: "window",
+    WIDGET_PRIORITIES: {
+        "window": 3,
+        "button": 2,
+        "textarea": 2,
+        "numberarea": 2,
+        "label": 1,
+        "texture": 0,
+        "icon": 0
+    },
 
     UP_KEY: "z",
     DOWN_KEY: "s",
