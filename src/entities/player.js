@@ -162,6 +162,12 @@ export class Player extends Entity {
 				break
 		}
 
+		if (this.game.inputHandler.isKeyPressed("e") && this.game.inventory_unlocked) {
+            if (!this.game.current_ui) {
+                this.game.current_ui = this.inventory;
+            }
+        }
+
 		super.update(current_time)
 		super.updateHitboxes()
 	}
