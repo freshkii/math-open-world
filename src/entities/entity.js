@@ -23,7 +23,6 @@ export class Entity {
 
         this.game = game
         this.map = map
-        this.type =type
 		this.id = game.next_entity_id
 		game.next_entity_id++
 
