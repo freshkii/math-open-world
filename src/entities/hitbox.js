@@ -25,7 +25,8 @@ export class Hitbox {
 
 		this.id = this.game.next_hitbox_id
 		this.game.next_hitbox_id++
-
+		this.x =x
+		this.y = y
 		this.x1 = new Resizeable(game, x)
 		this.x2 = new Resizeable(game, x + width)
 		this.y1 = new Resizeable(game, y)

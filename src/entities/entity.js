@@ -19,10 +19,10 @@ export class Entity {
     * @param {number} [life=null] - The entity's life, the entity is being invincible if life is null
     * @param {{ combat: { x: Number, y: Number; }; collision: { x: Number, y: Number; }; }} [hitboxes_offset={combat:{x:0,y:0},collision:{x:0,y:0}}] - The entity's hitboxes' offset in case you need them to be a little bit offcentered
     */
-    constructor(game, map, tileset, collision_hitbox, combat_hitbox, worldX, worldY, animation_duration, life=100, hitboxes_offset={combat:{x:0,y:0},collision:{x:0,y:0}}, bottom_y=null) {
+    constructor(game, map, tileset, collision_hitbox, combat_hitbox, worldX, worldY, animation_duration, life=100, hitboxes_offset={combat:{x:0,y:0},collision:{x:0,y:0}}, bottom_y=null, type = "Entity") {
         this.game = game
         this.map = map
-
+        this.type =type
 		this.id = game.next_entity_id
 		game.next_entity_id++
 
