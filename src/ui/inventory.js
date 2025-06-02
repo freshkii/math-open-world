@@ -2,8 +2,8 @@ import { config, constants } from "../constants.js";
 import { Game } from "../core/game.js";
 import { Resizeable } from "../utils.js";
 import { Item, ItemStack } from "./items.js";
-import { Ui } from "./ui.js";
-import { Button, Icon, Label, Texture, Widget } from "./widgets.js";
+import { Ui, UiPrototype } from "./ui.js";
+import { Button, Icon, Label, NumberArea, Texture, Widget, Window } from "./widgets.js";
 
 export class Inventory extends Ui{
     /**
@@ -20,17 +20,33 @@ export class Inventory extends Ui{
                 Inventory.get_slot_coordinates(i).x, Inventory.get_slot_coordinates(i).y,
                 slot_width, slot_width, true,
                 (b, time) => {
-                    const itemstack = this.get_slot(i);       
-                    if (itemstack && itemstack.consumable) {
-                        itemstack.add_count(-1)
-                        const countLabel = this.get_widget(`item-count-${i}`)
-                        countLabel.text = `${itemstack.count}`
-                        itemstack.item.on_use(itemstack.item, time)
+                    b.ui.clicked_slot = i
+                    let itemstack = b.ui.get_slot(i)
+                    if (itemstack){
+                        if(itemstack.consumable) {
+                            b.ui.get_widget("consumable-choice-window").update_config(
+                                b.game.inputHandler.mouse_pos.x + constants.TILE_SIZE / 13,
+                                b.game.inputHandler.mouse_pos.y + constants.TILE_SIZE / 13
+                            )
+                            b.ui.get_widget("consumable-choice-window").window_ui
+                                .get_widget("discard-window").window_ui
+                                .get_widget("discard-numberarea").max_char_number = itemstack.count.toString().length
+                            b.ui.get_widget("consumable-choice-window").activate()
+                        } else {
+                            b.ui.get_widget("regular-choice-window").update_config(
+                                b.game.inputHandler.mouse_pos.x + constants.TILE_SIZE / 13,
+                                b.game.inputHandler.mouse_pos.y + constants.TILE_SIZE / 13                
+                            )
+                            b.ui.get_widget("consumable-choice-window").window_ui
+                                .get_widget("discard-window").window_ui
+                                .get_widget("discard-numberarea").max_char_number = itemstack.count.toString().length
+                            b.ui.get_widget("regular-choice-window").activate()
+                        }
                     }
                 }
             ))
             widgets.push(new Label(game,`item-count-${i}`,Inventory.get_slot_coordinates(i).x + constants.TILE_SIZE*0.72,
-                                    Inventory.get_slot_coordinates(i).y + constants.TILE_SIZE*0.80, '0',
+                                    Inventory.get_slot_coordinates(i).y + constants.TILE_SIZE * 0.80, '0',
                                     false, 1, constants.TILE_SIZE / 2, 'white', 'Impact', true))
         }
         widgets_array.forEach(texture => {widgets.push(texture)})
@@ -182,6 +198,7 @@ export class Inventory extends Ui{
         }
         var inventory_side = new Resizeable(game, game.canvas.width / 2.6)
         super(game, inventory_side, inventory_side, widgets, widgets_states_handler)
+        this.clicked_slot = null
         this.slot_width = slot_width
         /** @type {Array<Array<ItemStack>>} */
         this.itemstacks = [
@@ -200,9 +217,107 @@ export class Inventory extends Ui{
     static async create(game, src){
         let slot_width = constants.TILE_SIZE * 1.05
         let widgets_array = [
+            new Label(game, "tooltip-title-label", 0, 0, "", false, 4, constants.TILE_SIZE * 0.5, "white"),
             await Texture.create(game, "hovered-texture",
                 "inventory_hovered_tileset.png", 0, 0, slot_width, slot_width, false, 2),
-            new Label(game, "tooltip-title-label", 0, 0, "", false, 4, constants.TILE_SIZE * 0.5, "white")
+            new Window(game, "regular-choice-window",
+                await UiPrototype.create(game, "inventory_regular_discard_window.png", 0, 0, constants.TILE_SIZE, constants.TILE_SIZE, [
+                    new Button(game, "discard-button", -constants.TILE_SIZE / 2, -constants.TILE_SIZE / 2, constants.TILE_SIZE, constants.TILE_SIZE / 2, true,
+                        (button, time) => {
+                            button.ui.get_widget("discard-window").update_config(
+                                button.ui.x_center.get() + constants.TILE_SIZE / 2,
+                                button.ui.y_center.get() - constants.TILE_SIZE / 4
+                            )
+                            button.ui.get_widget("discard-window").activate()
+                        }),
+                    new Label(game, "discard-label", -constants.TILE_SIZE / 4, -constants.TILE_SIZE / 4, "Discard", true, 0, constants.TILE_SIZE / 6),
+                    new Button(game, "cancel-button", -constants.TILE_SIZE / 2, 0, constants.TILE_SIZE, constants.TILE_SIZE / 2, true,
+                        (button, time) => {
+                            button.ui.is_finished = true
+                        }
+                    ),
+                    new Label(game, "cancel-label", -constants.TILE_SIZE / 4, constants.TILE_SIZE / 4, "Cancel", true, 0, constants.TILE_SIZE / 6),
+                    new Window(game, "discard-window",
+                        await UiPrototype.create(game, "inventory_discard_count_window.png", 0, 0, constants.TILE_SIZE * 1.5, constants.TILE_SIZE, [
+                            new Label(game, "discard-label", -constants.TILE_SIZE * 0.625, -constants.TILE_SIZE / 4, "Discard count:", true, 0, constants.TILE_SIZE / 6),
+                            new NumberArea(game, "discard-numberarea", -constants.TILE_SIZE * 0.625, 0, constants.TILE_SIZE * 0.75, constants.TILE_SIZE / 4, 2, true, 0, constants.TILE_SIZE * 0.2),
+                            new Button(game, "confirm-button", constants.TILE_SIZE * 0.15, 0, constants.TILE_SIZE * 0.5, constants.TILE_SIZE / 4, true,
+                                (button, time) => {
+                                    if(button.ui.source.ui.source.ui.get_slot(button.ui.source.ui.source.ui.clicked_slot).count < parseInt(button.ui.get_widget("discard-numberarea").content)) return
+                                    button.ui.source.ui.source.ui.get_slot(button.ui.source.ui.source.ui.clicked_slot)
+                                        .add_count(-parseInt(button.ui.get_widget("discard-numberarea").content))
+                                    button.ui.is_finished = true
+                                    button.ui.source.ui.is_finished = true
+                                }
+                            ),
+                            new Button(game, "cancel-button", constants.TILE_SIZE * 0.15, constants.TILE_SIZE / 4, constants.TILE_SIZE * 0.5, constants.TILE_SIZE / 4, true,
+                                (button, time) => {
+                                    button.ui.is_finished = true
+                                }
+                            ),
+                            new Label(game, "confirm-label", constants.TILE_SIZE * 0.15, constants.TILE_SIZE / 8, "confirm", true, 0, constants.TILE_SIZE * 0.15),
+                            new Label(game, "cancel-label", constants.TILE_SIZE * 0.15, constants.TILE_SIZE * 0.375, "cancel", true, 0, constants.TILE_SIZE * 0.15)
+                        ], (ui, time) => {
+
+                        }))
+                ], (ui, time) => {
+
+                }), false
+            ),
+            new Window(game, "consumable-choice-window",
+                await UiPrototype.create(game, "inventory_consumable_discard_window.png", 0, 0, constants.TILE_SIZE, constants.TILE_SIZE * 1.5, [
+                    new Button(game, "use-button", -constants.TILE_SIZE / 2, -constants.TILE_SIZE * 0.75, constants.TILE_SIZE, constants.TILE_SIZE / 2, true,
+                        (button, time) => {
+                            /** @type {Inventory} */
+                            let inventory = button.ui.source.ui
+                            inventory.get_slot(inventory.clicked_slot).add_count(-1)
+                            inventory.get_slot(inventory.clicked_slot).item.on_use(inventory.get_slot(inventory.clicked_slot).item, time)
+                            inventory.get_widget(`item-count-${inventory.clicked_slot}`).text = inventory.get_slot(inventory.clicked_slot).count
+                            button.ui.is_finished = true
+                        }),
+                    new Label(game, "use-label", -constants.TILE_SIZE / 4, -constants.TILE_SIZE * 0.5, "Use", true, 0, constants.TILE_SIZE / 6),
+                    new Button(game, "discard-button", -constants.TILE_SIZE / 2, -constants.TILE_SIZE * 0.25, constants.TILE_SIZE, constants.TILE_SIZE / 2, true,
+                        (button, time) => {
+                            button.ui.get_widget("discard-window").update_config(
+                                button.ui.x_center.get() + constants.TILE_SIZE / 2,
+                                button.ui.y_center.get()
+                            )
+                            button.ui.get_widget("discard-window").activate()
+                        }),
+                    new Label(game, "discard-label", -constants.TILE_SIZE / 4, 0, "Discard", true, 0, constants.TILE_SIZE / 6),
+                    new Button(game, "cancel-button", -constants.TILE_SIZE / 2, constants.TILE_SIZE * 0.25, constants.TILE_SIZE, constants.TILE_SIZE / 2, true,
+                        (button, time) => {
+                            button.ui.is_finished = true
+                        }
+                    ),
+                    new Label(game, "cancel-label", -constants.TILE_SIZE / 4, constants.TILE_SIZE * 0.5, "Cancel", true, 0, constants.TILE_SIZE / 6),
+                    new Window(game, "discard-window",
+                        await UiPrototype.create(game, "inventory_discard_count_window.png", 0, 0, constants.TILE_SIZE * 1.5, constants.TILE_SIZE, [
+                            new Label(game, "discard-label", -constants.TILE_SIZE * 0.625, -constants.TILE_SIZE / 4, "Discard count:", true, 0, constants.TILE_SIZE / 6),
+                            new NumberArea(game, "discard-numberarea", -constants.TILE_SIZE * 0.625, 0, constants.TILE_SIZE * 0.75, constants.TILE_SIZE / 4, 2, true, 0, constants.TILE_SIZE * 0.2),
+                            new Button(game, "confirm-button", constants.TILE_SIZE * 0.15, 0, constants.TILE_SIZE * 0.5, constants.TILE_SIZE / 4, true,
+                                (button, time) => {
+                                    if(button.ui.source.ui.source.ui.get_slot(button.ui.source.ui.source.ui.clicked_slot).count < parseInt(button.ui.get_widget("discard-numberarea").content)) return
+                                    button.ui.source.ui.source.ui.get_slot(button.ui.source.ui.source.ui.clicked_slot)
+                                        .add_count(-parseInt(button.ui.get_widget("discard-numberarea").content))
+                                    button.ui.is_finished = true
+                                    button.ui.source.ui.is_finished = true
+                                }
+                            ),
+                            new Button(game, "cancel-button", constants.TILE_SIZE * 0.15, constants.TILE_SIZE / 4, constants.TILE_SIZE * 0.5, constants.TILE_SIZE / 4, true,
+                                (button, time) => {
+                                    button.ui.is_finished = true
+                                }
+                            ),
+                            new Label(game, "confirm-label", constants.TILE_SIZE * 0.15, constants.TILE_SIZE / 8, "confirm", true, 0, constants.TILE_SIZE * 0.15),
+                            new Label(game, "cancel-label", constants.TILE_SIZE * 0.15, constants.TILE_SIZE * 0.375, "cancel", true, 0, constants.TILE_SIZE * 0.15)
+                        ], (ui, time) => {
+
+                        }))
+                ], (ui, time) => {
+
+                }), false
+            )
         ]
         for(let i=0; i<9; i++){
             widgets_array.push(await Texture.create(game, `item-texture-${i}`,
@@ -223,9 +338,7 @@ export class Inventory extends Ui{
         super.update(current_time)
         if (this.game.inputHandler.isKeyPressed("e") && this.game.inventory_unlocked) {
             if (this.game.current_ui === this) {
-                this.game.current_ui = null;
-            } else if (!this.game.current_ui) {
-                this.game.current_ui = this;
+                this.game.current_ui = this.inventory;
             }
         }
         for(let i = 0; i < 9; i++){
@@ -238,10 +351,16 @@ export class Inventory extends Ui{
                     this.shift_items(i);
                 }else{
                     this.get_widget(`item-count-${i}`).update_config(null, null, slot.count)
-                    if(slot.passive){
-                        slot.item.effect(slot.item, current_time)
-                    }
                 }
+            }
+        }
+    }
+
+    update_passive_effects(current_time){
+        for(let i = 0; i < 9; i++){
+            let slot = this.get_slot(i)
+            if(slot?.passive){
+                slot.item.effect(slot.item, current_time)
             }
         }
     }
@@ -253,7 +372,7 @@ export class Inventory extends Ui{
      */
     get_next_empty_slot(item){
         for(let i = 0; i < 9; i++){
-            if(this.get_slot(i) != null && this.get_slot(i).item == item) return i
+            if(this.get_slot(i)?.item == item) return i
         }
         for(let i = 0; i < 9; i++){
             if(this.get_slot(i) == null) return i
@@ -294,27 +413,24 @@ export class Inventory extends Ui{
 
     /**
      * 
-     * @param {Array<ItemStack>} itemstacks 
+     * @param {ItemStack} itemstack 
      */
-    add_items(itemstacks){
-        for(let n = 0; n < itemstacks.length; n++){
-            let itemstack = itemstacks[n]
-            var slot = this.get_next_empty_slot(itemstack.item)
-            this.get_widget(`item-texture-${slot}`).img = this.game.items[itemstack.item.name].img
-            this.get_widget(`item-texture-${slot}`).rendered = true
-            if(this.get_slot(n) != null && this.get_slot(n).item == itemstack.item){
-                this.get_slot(n).add_count(itemstack.count)
-            }else{
-                this.set_slot(slot, itemstack)
-            }
-            let countLabel = this.get_widget(`item-count-${slot}`);
-            countLabel.text = itemstack.count.toString();
-            if (itemstack.consumable && itemstack.count >= 1) {
-                countLabel.rendered = true;
-            }
-            else {
-                countLabel.rendered = false;
-            }
+    add_items(itemstack){
+        var slot = this.get_next_empty_slot(itemstack.item)
+        this.get_widget(`item-texture-${slot}`).img = this.game.items[itemstack.item.name].img
+        this.get_widget(`item-texture-${slot}`).rendered = true
+        if(this.get_slot(slot) != null && this.get_slot(slot).item == itemstack.item){
+            this.get_slot(slot).add_count(itemstack.count)
+        }else{
+            this.set_slot(slot, itemstack)
+        }
+        let countLabel = this.get_widget(`item-count-${slot}`);
+        countLabel.text = itemstack.count.toString();
+        if (itemstack.consumable && itemstack.count >= 1) {
+            countLabel.rendered = true;
+        }
+        else {
+            countLabel.rendered = false;
         }
     }
 

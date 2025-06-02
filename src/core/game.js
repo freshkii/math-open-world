@@ -120,7 +120,8 @@ export class Game {
 				instance.entity.state = instance.state
 			}, 1000),
 			BLINK: new Effect(instance => {}, instance => {
-				instance.map = instance.entity.map, instance.entity.map = null
+				instance.map = instance.entity.map
+				instance.entity.map = null
 			}, instance => {
 				instance.entity.map = instance.map
 			}, 0),
@@ -138,6 +139,7 @@ export class Game {
 			}, instance => {
 				instance.entity.fullSpeed.set_value(instance.speed_before)
 			}, 0),
+			// Just so you know, that's just a joke/test huh
 			BIG_HITBOX: new Effect(instance => {},
 				instance => {
 					instance.entity.collision_hitbox.width.set_value(instance.entity.collision_hitbox.width.get() * 1.49)
@@ -148,6 +150,9 @@ export class Game {
 				}
 			)
 		}
+
+		/**@type {Array<{command: () => void, delay: Number, activation_time: Number}>} */
+		this.planned = []
 	}
 
 	async run() {
@@ -175,6 +180,7 @@ export class Game {
 		await Tileset.create(this, "checkbox_tileset.png", 32, constants.TILE_SIZE / 2, 0)
 		await Tileset.create(this, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
 		await Tileset.create(this, "inventory_tooltip_tileset.png", 16, constants.TILE_SIZE / 4, 0)
+
 		await Tileset.create(this, "digital_locks.png", 20, constants.TILE_SIZE, 0)
 		await Tileset.create(this, "Game Boy Advance - The Legend of Zelda The Minish Cap - Lon Lon Ranch.png", 16, constants.TILE_SIZE, 0)
 		await Tileset.create(this, "Game Boy Advance - The Legend of Zelda The Minish Cap - Hyrule Town.png", 16, constants.TILE_SIZE, 0)
@@ -232,20 +238,21 @@ export class Game {
 		)
     
 		const test_consumable_stack = new ItemStack(test_consumable, 1)
-		inventory.add_items([test_consumable_stack])
+		inventory.add_items(test_consumable_stack)
 		
 		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
-		//this.effects.BIG_HITBOX.apply(time, this.player, 100)
+			// Totally temporary
+			this.effects.BIG_HITBOX.apply(time, this.player, 100)
+		//this.effects.BIG_HITBOX.apply(time, this.player, 100) it's very annoying so i'll turn that off for a bit
 	})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
 		const test_item_stack = new ItemStack(test_item, 1)
-
-		inventory.add_items([test_item_stack])
+		inventory.add_items(test_item_stack)
 
 		const test_consumable2 = (await Consumable.create(this, "Item_Black3.png", "Speed Potion",
 			(c, time) => {this.effects.SPEED1.apply(time, this.player, 10000)}
 		)).set_tooltip("Drinking this potion makes you faster for a certain period")
 		const test_consumable_stack2 = new ItemStack(test_consumable2, 5)
-		inventory.add_items([test_consumable_stack2])
+		inventory.add_items(test_consumable_stack2)
 
 		const colors_problem = await Problem.create(
 			this, "book_ui.png", this.canvas.width * 0.34375, this.canvas.width * 0.453125, ["3", "4", "4"], (problem) => {
@@ -892,6 +899,13 @@ export class Game {
 	 * @returns 
 	 */
 	update(current_time) {
+		this.planned.filter(command => command.activation_time==null).forEach(command => command.activation_time = current_time + command.delay)
+		this.planned.forEach(command => {
+			if(command.activation_time <= current_time){
+				command.command()
+				this.planned.splice(this.planned.indexOf(command), 1)
+			}
+		})
 		this.collision_hitboxes = this.collision_hitboxes.filter(h => h.active)
 		this.combat_hitboxes = this.combat_hitboxes.filter(h => h.active)
 		this.hitboxes = this.hitboxes.filter(h => h.active)
@@ -938,8 +952,6 @@ export class Game {
 		Object.values(this.effects).forEach(effect => effect.update(current_time))
 
 		this.talkables.forEach(talkable => {talkable.update()})
-
-		this.player.inventory.update(current_time)
 	}
 
 	render() {
@@ -991,5 +1003,15 @@ export class Game {
 	 */
 	get_current_map(){
 		return this.maps[this.current_map]
+	}
+
+	/**
+	 * Allows to plan out command to be executed after a certain amount of time,
+	 * ⚠ make sure that the values that you use in the command still exist after that amount of time
+	 * @param {() => void} command 
+	 * @param {number} delay 
+	 */
+	plan(command, delay){
+		this.planned.push({command: command, delay: delay, activation_time: null})
 	}
 }
