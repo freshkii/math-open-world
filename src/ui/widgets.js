@@ -462,7 +462,7 @@ export class Texture extends Widget{
     }
 
     /**
-     * Image widget. Unlike the Icon, it doesn't use a tileset but directly a file instead. The create method is asyn and static
+     * Image widget. Unlike the Icon, it doesn't use a tileset but directly a file instead. The create method is async and static
      * @param {Game} game - The current game
      * @param {String} id - The widget's Id
      * @param {String} src - The path to the image file used by the widget
