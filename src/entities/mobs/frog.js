@@ -27,9 +27,8 @@ export class Frog extends Mob {
             new Hitbox(game, map, 0, 0, constants.TILE_SIZE * 0.40625, constants.TILE_SIZE * 0.25, false, false),
             worldX, worldY, 200, ai, 5,
             {combat: {x: constants.TILE_SIZE * 0.015625, y: constants.TILE_SIZE * 0.0625},
-            collision: {x: constants.TILE_SIZE * 0.015625, y: constants.TILE_SIZE * 0.0625}}
+            collision: {x: constants.TILE_SIZE * 0.015625, y: constants.TILE_SIZE * 0.0625}}, "Frog"
 		)
-
         this.framesPerState = [5, 3]
     }
 }
