@@ -176,16 +176,19 @@ export class Game {
 		await Tileset.create(this, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
 		await Tileset.create(this, "inventory_tooltip_tileset.png", 16, constants.TILE_SIZE / 4, 0)
 		await Tileset.create(this, "digital_locks.png", 20, constants.TILE_SIZE, 0)
+		await Tileset.create(this, "Game Boy Advance - The Legend of Zelda The Minish Cap - Lon Lon Ranch.png", 16, constants.TILE_SIZE, 0)
+		await Tileset.create(this, "Game Boy Advance - The Legend of Zelda The Minish Cap - Hyrule Town.png", 16, constants.TILE_SIZE, 0)
 
 		await Tileset.create(this, "firefly.png", 16, constants.TILE_SIZE, 0)
 
 		await Map.create(this, 'house.json', "black", {x: constants.TILE_SIZE * 1.5, y: 3 * constants.TILE_SIZE})
 		await Map.create(this, 'map.json', "grey", {x: 15.5 * constants.TILE_SIZE, y: 14.01 * constants.TILE_SIZE})
 		await Map.create(this, 'new_map.json', "grey", {x: 116.5 * constants.TILE_SIZE, y: 80.5 * constants.TILE_SIZE})
+		await Map.create(this, 'map 2.json', "grey", {x: 184.5, y:93.5})
 
 		this.options_menu = await OptionsMenu.create(this)
 		
-		this.current_map = "house" // "scene"
+		this.current_map = "map 2" // "scene"
 		this.map = this.maps[this.current_map]
 
 		// test entities
@@ -232,8 +235,8 @@ export class Game {
 		inventory.add_items([test_consumable_stack])
 		
 		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
-			this.effects.BIG_HITBOX.apply(time, this.player, 100)
-		})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
+		//this.effects.BIG_HITBOX.apply(time, this.player, 100)
+	})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
 		const test_item_stack = new ItemStack(test_item, 1)
 
 		inventory.add_items([test_item_stack])
