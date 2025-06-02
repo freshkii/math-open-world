@@ -83,7 +83,7 @@ export class OptionsMenu extends Ui{
             game.audioManager.setSoundVolume(this.sound_effects_volume / 100)
             if(this.game.inputHandler.isKeyPressed("escape")) this.is_finished = true
         })
-        this.debug = false
+        this.debug = true 
         this.music_volume = 100
         this.sound_effects_volume = 100
     }
