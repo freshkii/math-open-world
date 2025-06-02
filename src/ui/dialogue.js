@@ -23,12 +23,12 @@ export class Dialogue extends Ui{
             true, 0, fontsize, textcolor, font),
             new Button(game, "new-line-button",
                 - game.canvas.width / 2, new YResizeable(game, - game.canvas.height / 2), game.canvas.width, new YResizeable(game, game.canvas.height),
-                true, (button) => button.ui.next()),
+                true, (button, t) => button.ui.next()),
             new Icon(game, "arrow-icon", game.canvas.width / 9 * 4, new YResizeable(game, game.canvas.height / 9 * 4),
                 arrow_tileset, 1, false, 0)
         ]
 
-        var widgets_states_handler = (dialogue) => {
+        var widgets_states_handler = (dialogue, time) => {
 
         }
 
@@ -54,8 +54,7 @@ export class Dialogue extends Ui{
      * @returns {Promise<Dialogue>}
      */
     static async create(game, src, text, on_end=(d) => {}, fontsize=15, textcolor="black", font="arial"){
-        let arrow_tileset = await Tileset.create(game, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
-        const dialogue = new Dialogue(game, text, arrow_tileset, on_end, fontsize, textcolor, font)
+        const dialogue = new Dialogue(game, text, game.tilesets["arrow"], on_end, fontsize, textcolor, font)
         try {
 			await dialogue.load(config.IMG_DIR + src)
 		} catch (error) {
@@ -69,6 +68,8 @@ export class Dialogue extends Ui{
         super.update(current_time)
         if(current_time - this.last_time < 80) return
         this.last_time = current_time
+        if(this.game.inputHandler.isKeyPressed("enter"))
+            this.next()
         /** @type {Label} */
         var label = this.get_widget("dialogue-content")
         if(label.text == this.sentences[this.sentence]) return
@@ -123,7 +124,7 @@ export class QuestionDialogue extends Ui {
             true, 0, fontsize, textcolor, font),
             new Button(game, "new-line-button",
                 - game.canvas.width / 2, new YResizeable(game, - game.canvas.height / 2), game.canvas.width, new YResizeable(game, game.canvas.height),
-                true, (button) => button.ui.next()),
+                true, (button, t) => button.ui.next()),
             new Icon(game, "arrow-icon", game.canvas.width / 9 * 4, new YResizeable(game, game.canvas.height / 9 * 4),
                 arrow_tileset, 1, false, 0)
         ]
@@ -140,7 +141,7 @@ export class QuestionDialogue extends Ui {
             widgets.push(
 				new Button(game, "anwser-button-"+i.toString(),
 					anwsers_x, new YResizeable(game, anwsers_y - ((i + 1) * anwsers_height)), anwsers_width, new YResizeable(game, anwsers_height), false,
-					(button) => {
+					(button, t) => {
 						if(!button.has_focus) return
 						if(button.ui.sentence + 1 != button.ui.sentences.length || button.ui.get_widget("dialogue-content").text != button.ui.sentences[button.ui.sentence]) return
 						let anwser_number = parseInt(button.id.split("-").at(-1))
@@ -158,7 +159,7 @@ export class QuestionDialogue extends Ui {
             anwsers_x + anwsers_width - arrow_tileset.screen_tile_size.get(), new YResizeable(game, anwsers_y - ((i + 0.75) * anwsers_height)), arrow_tileset, 4, false, 1))
         }
 
-        var widgets_states_handler = (dialogue) => {
+        var widgets_states_handler = (dialogue, time) => {
             for(let i = 0; i < anwsers.length; i++){
                 if(dialogue.get_widget("anwser-button-"+i.toString()).has_focus){
                     dialogue.get_widget("anwser-arrow-"+i.toString()).rendered = true
@@ -203,10 +204,9 @@ export class QuestionDialogue extends Ui {
     static async create(game, src, text, anwsers, anwsers_x, anwsers_y, anwsers_width, anwsers_height, anwser_box_tileset_src, on_end=(d, a) => {}, fontsize=15, textcolor="black", font="arial"){
         anwsers_width = Math.round(anwsers_width)
         anwsers_height = Math.round(anwsers_height)
-        let arrow_tileset = await Tileset.create(game, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
         let anwser_box_tileset = await Tileset.create(game, anwser_box_tileset_src, 16, 0, 0)
         anwser_box_tileset.screen_tile_size = new YResizeable(game, anwsers_height)
-        const dialogue = new QuestionDialogue(game, text, arrow_tileset, anwsers, anwsers_x, anwsers_y, anwsers_width, anwsers_height, anwser_box_tileset, on_end, fontsize, textcolor, font)
+        const dialogue = new QuestionDialogue(game, text, game.tilesets["arrow"], anwsers, anwsers_x, anwsers_y, anwsers_width, anwsers_height, anwser_box_tileset, on_end, fontsize, textcolor, font)
         try {
 			await dialogue.load(config.IMG_DIR + src)
 		} catch (error) {
@@ -221,7 +221,14 @@ export class QuestionDialogue extends Ui {
 
         if(current_time - this.last_time < 80) return
         this.last_time = current_time
-        
+
+        if(this.game.inputHandler.isKeyPressed("enter")){
+            this.next()
+            if(this.focused_widgets.length > 1){
+                let selected_awnser = this.focused_widgets.filter(widget => widget != this.get_widget("new-line-button"))[0]
+                selected_awnser.command(selected_awnser, current_time)
+            }
+        }
         /** @type {Label} */
         var label = this.get_widget("dialogue-content")
         

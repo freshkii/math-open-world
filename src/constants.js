@@ -23,6 +23,16 @@ export const constants = {
     NUMBERAREA_TYPE: "numberarea",
     ICON_TYPE: "icon",
     TEXTURE_TYPE: "texture",
+    WINDOW_TYPE: "window",
+    WIDGET_PRIORITIES: {
+        "window": 3,
+        "button": 2,
+        "textarea": 2,
+        "numberarea": 2,
+        "label": 1,
+        "texture": 0,
+        "icon": 0
+    },
 
     UP_KEY: "z",
     DOWN_KEY: "s",
@@ -30,6 +40,8 @@ export const constants = {
     RIGHT_KEY: "d",
     INTERACTION_KEY: "e",
     DASH_KEY: " ",
+	DRAG_KEY: "f",
+
 
 	DOWN_DIRECTION: 0,
 	UP_DIRECTION: 1,
@@ -54,6 +66,7 @@ export const constants = {
     HEALTH_COLORS:['red', 'orange', 'green']
 }
 
+
 // The future has arrived
 // the format is
 // map_name: tile_number: {x: new_x, y: new_y, width: new_width, height: new_height}
@@ -76,15 +89,33 @@ export const collisions = {
         167: {x: 56, width: 72, height: 110},
         168: {height: 110},
         170: {height: 110},
-        171: {width: 72, height: 110}
+        171: {width: 72, height: 110},
     },
     "house.json": {
         11: {y: -8, height: 96},
         55: {y: -8, height: 96}
     },
 	"new_map.json": {
-		169: {width: 0, height: 1}
-	}
+		169: {width: 0, height: 0},
+		76: { x: 20, y: 90, width: 76, height: 22},
+        113: {x: 22, y: 75, width: 85, height: 25},
+        114: {x: 32, width: 64, height: 112},
+        127: {x: 56, width: 72},
+        131: {width: 72},
+        167: {x: 56, width: 72, height: 110},
+        168: {height: 110},
+        170: {height: 110},
+        171: {width: 72, height: 110},
+		721: {x: 50,width:30,height:110},
+		724: {y:32, height:80, x:40, width: 48},
+		725: {x:50, width:30},
+		683: {x:40, y: 56, height:56, width:48},
+		684: {x:40,y:56, width:48},
+		685: {y:56, height:32},
+		723: {x:40, y:32, height:80, width:48}
+	},
+	"map_multi_ts.json": {},
+	"map 2.json": {}
 }
 
 
@@ -105,6 +136,24 @@ export const blockDepthOrder = {
         55
     ],
 	"new_map.json": [
-		169
-	]
+		169,
+		131,
+        127,
+        725,
+        684,
+        683,
+        724,
+        685,
+        113,
+		723,
+        721,
+        168,
+        170,
+        167,
+        171,
+        114,
+        76  
+	],
+	"map_multi_ts.json": [],
+	"map 2.json": []
 }

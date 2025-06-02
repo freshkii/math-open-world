@@ -165,18 +165,11 @@
         }],
     "animated": {
         "500": {
-            "tileset": {
-                "path": "firefly.png",
-                "tilesize": 16,
-                "spacing": 0
-            },
+            "tileset": "firefly",
             "frameorder": [1, 2, 3, 4, 5, 6]
         },
         "501": {
-            "tileset": {
-                "path": "500",
-                "comment": "the above means that this animation will use the same tileset as the 500, avoiding creating the same tileset multiple times"
-            },
+            "tileset": "firefly",
             "frameorder": [1, 2, 3, 4, 5, 6, 1, 6, 5, 4, 3, 2]
         }
     },
@@ -190,7 +183,7 @@
     "tilesets":[
         {
             "firstgid":1,
-            "source":"..\/sprites\/map.tsx"
+            "source":"map"
         }],
     "tilewidth":16,
     "type":"map",

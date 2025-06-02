@@ -6,7 +6,6 @@ import { Map } from '../world/map.js'
 import { clamp, Resizeable } from '../utils.js'
 import { ProjectileAttack, SwingingAttack } from './attack.js'
 import { Inventory } from '../ui/inventory.js'
-import { Draggable } from './draggable.js'
 
 export class Player extends Entity {
 	/**
@@ -21,8 +20,6 @@ export class Player extends Entity {
 			new Hitbox(game, game.get_current_map(), 400, 400, 2 * constants.TILE_SIZE / 3, constants.TILE_SIZE, false, true),
 			600, 600, 125, 100, {combat: {x: 0, y: 0}, collision: {x: 0, y: constants.TILE_SIZE / 4}}
 		)
-		this.collision_hitbox.owner = this
-		this.combat_hitbox.owner = this
 
 		this.framesPerState.push(6)
 
@@ -30,7 +27,7 @@ export class Player extends Entity {
 
 		this.inputHandler = game.inputHandler
 
-		/** @type {Draggable} */
+		/** @type {Entity} */
 		this.dragged_entity = null
 
 		this.fullSpeed = new Resizeable(game, constants.TILE_SIZE / 24)
@@ -77,8 +74,72 @@ export class Player extends Entity {
 			this.last_dash = this.dash_reset ? 0 : currentTime
 			this.dash_reset = false
 			this.dashing = false
+
 			this.fullSpeed.set_value(constants.TILE_SIZE / 24)
 			this.acceleration.set_value(constants.TILE_SIZE / 64)
+		}
+	
+		if (this.inputHandler.isKeyDown(constants.UP_KEY)) {
+			this.direction = constants.UP_DIRECTION
+			this.dy.set_value(this.dy.get() - this.acceleration.get())
+		}
+		if (this.inputHandler.isKeyDown(constants.DOWN_KEY)) {
+			this.direction = constants.DOWN_DIRECTION
+			this.dy.set_value(this.dy.get() + this.acceleration.get())
+		}
+		if (this.inputHandler.isKeyDown(constants.LEFT_KEY)) {
+			this.direction = constants.LEFT_DIRECTION
+			this.dx.set_value(this.dx.get() - this.acceleration.get())
+		}
+		if (this.inputHandler.isKeyDown(constants.RIGHT_KEY)) {
+			this.direction = constants.RIGHT_DIRECTION
+			this.dx.set_value(this.dx.get() + this.acceleration.get())
+		}
+
+		// ATTACKS
+		if (this.state !== constants.ATTACK_STATE) {
+
+			if (this.inputHandler.isMousePressed(constants.MOUSE_RIGHT_BUTTON)) {
+				const playerWorldX = this.worldX.get()
+				const playerWorldY = this.worldY.get()
+
+				const mouseWorldX = this.game.camera.x.get() + (this.inputHandler.mouse_pos.x + this.game.canvas.width / 2)
+				const mouseWorldY = this.game.camera.y.get() + (this.inputHandler.mouse_pos.y + this.game.canvas.height / 2)
+
+				const dx = mouseWorldX - playerWorldX
+				const dy = mouseWorldY - playerWorldY
+
+				const distance = Math.hypot(dx, dy)
+				if (distance <= 10) return
+				
+			   
+				const speed = 20
+				const velX = (dx / distance) * speed
+				const velY = (dy / distance) * speed
+				
+				const hb = new Hitbox(this.game, this.game.get_current_map(), playerWorldX, playerWorldY,
+					constants.TILE_SIZE / 2, constants.TILE_SIZE / 2, false, false)
+				new ProjectileAttack(this.game, this, this.game.get_current_map(), current_time,
+					2000, [hb], velX, velY,(e) => { e.life -= 2; this.game.effects.BLINK.apply(current_time, e, 200) }, false, this.game.tilesets["Axe"], 50,
+					{x: playerWorldX - hb.width.get() / 2, y: playerWorldY - hb.height.get() /2})
+			}
+
+			let mouse_input = this.inputHandler.isMousePressed(constants.MOUSE_LEFT_BUTTON)
+			if (mouse_input || this.inputHandler.isKeyPressed('a')) {
+				// fancy stuff
+				if (mouse_input) {
+					this.updateDirectionFromMouse()
+				}
+
+				this.game.effects.ATTACK.apply(current_time,this, 300)
+				this.game.effects.MOTIONLESS.apply(current_time, this, 300)
+
+				new SwingingAttack(this.game, this, this.game.get_current_map(), current_time, 300,
+					{x: this.worldX.get(), y: this.worldY.get()}, this.direction,
+					constants.TILE_SIZE/5, constants.TILE_SIZE, constants.TILE_SIZE/2,
+					(e) => { e.life -= 2 ; this.game.effects.BLINK.apply(current_time, e, 200)})
+				this.game.audioManager.playSound('game', 'slash', 0.5)
+      }
 		}
 	}
 
@@ -100,6 +161,14 @@ export class Player extends Entity {
 				this.updateDrag(current_time)
 				break
 		}
+
+		if (this.game.inputHandler.isKeyPressed("e") && this.game.inventory_unlocked) {
+            if (!this.game.current_ui) {
+                this.game.current_ui = this.inventory;
+            }
+        }
+
+		this.inventory.update_passive_effects(current_time)
 
 		super.update(current_time)
 		super.updateHitboxes()
@@ -142,6 +211,13 @@ export class Player extends Entity {
 	 */
 	set_map(new_map){
 		super.set_map(new_map)
+		if (this.dragged_entity) {
+			this.dragged_entity = null
+			this.state = constants.IDLE_STATE
+			this.fullSpeed.set_value(constants.TILE_SIZE / 24)
+			this.acceleration.set_value(constants.TILE_SIZE / 64)
+		}
+
 		this.worldX.set_value(new_map.player_pos.x.get())
 		this.worldY.set_value(new_map.player_pos.y.get())
 	}
@@ -159,6 +235,11 @@ export class Player extends Entity {
 	updateIdle(currentTime) {
 		this.handleMoveInput()
 		this.handleAttackInput(currentTime)
+
+		if (this.handleDragInput(currentTime)) {
+			return
+		}
+
 		this.updateMovements()
 		this.updateDash(currentTime)
 		super.update(currentTime)
@@ -241,29 +322,80 @@ export class Player extends Entity {
 	}
 
 	updateDrag(currentTime) {
-        this.acceleration.set_value(constants.TILE_SIZE / 64)
-        this.fullSpeed.set_value(constants.TILE_SIZE / 32)
+		if (this.inputHandler.isKeyPressed(constants.DRAG_KEY)) {
+			this.state = constants.IDLE_STATE
+			this.dragged_entity = null
+			this.fullSpeed.set_value(constants.TILE_SIZE / 24)
+			return
+		}
 
-        if (this.inputHandler.isKeyPressed("f")) {
-            this.state = constants.IDLE_STATE
-            this.dragged_entity = null
-        }
-        this.handleMoveInput()
-        this.updateMovements()
+		const originalPlayerDirection = this.direction
+		const originalPlayerX = this.worldX.get()
+		const originalPlayerY = this.worldY.get()
+		const originalEntityX = this.dragged_entity.worldX.get()
+		const originalEntityY = this.dragged_entity.worldY.get()
 
-        this.dragged_entity.dx.set_value(this.dx.get())
-        this.dragged_entity.dy.set_value(this.dy.get())
+		this.handleMoveInput()
+		this.updateMovements()
 
-        super.update(currentTime)
-    }
+		const gap = constants.TILE_SIZE * 0.3
+		let targetX, targetY
+		
+		switch(this.direction) {
+			case constants.LEFT_DIRECTION:
+				targetX = this.collision_hitbox.x1.get() - this.collision_hitbox.width.get()/2 - gap
+				targetY = this.worldY.get()
+				break
+			case constants.RIGHT_DIRECTION:
+				targetX = this.collision_hitbox.x2.get() + this.collision_hitbox.width.get()/2 + gap
+				targetY = this.worldY.get()
+				break
+			case constants.UP_DIRECTION:
+				targetX = this.worldX.get()
+				targetY = this.collision_hitbox.y1.get() - this.collision_hitbox.height.get() - gap
+				break
+			case constants.DOWN_DIRECTION:
+				targetX = this.worldX.get()
+				targetY = this.collision_hitbox.y2.get() + gap
+				break
+			default:
+				targetX = this.worldX.get()
+				targetY = this.worldY.get()
+		}
+
+		this.dragged_entity.worldX.set_value(targetX)
+		this.dragged_entity.worldY.set_value(targetY)
+		
+		this.updateHitboxes()
+		this.dragged_entity.updateHitboxes()
+
+		if (this.colliding() || this.dragged_entity.colliding()) {
+			this.worldX.set_value(originalPlayerX)
+			this.worldY.set_value(originalPlayerY)
+			this.dragged_entity.worldX.set_value(originalEntityX)
+			this.dragged_entity.worldY.set_value(originalEntityY)
+			
+			this.dx.set_value(0)
+			this.dy.set_value(0)
+			this.direction = originalPlayerDirection
+		}
+
+		super.update(currentTime)
+	}
 
 	handleDragInput() {
-		if (this.state !== constants.DRAG_STATE) {
-			for (const hb of this.raycast_hitbox.get_colliding_hitboxes(true, false)) {
-				if (hb.owner instanceof Draggable && this.inputHandler.isKeyPressed("f")) {
-					this.dragged_entity = hb.owner
-					this.state = constants.DRAG_STATE
-				}
+		if (!this.inputHandler.isKeyPressed(constants.DRAG_KEY))
+			return false
+
+		for (const hb of this.raycast_hitbox.get_colliding_hitboxes(true, true)) {
+			console.log(hb)
+			console.log(hb.owner instanceof Entity)
+			if (hb.owner instanceof Entity && hb.owner.draggable) {
+				this.dragged_entity = hb.owner
+				this.state = constants.DRAG_STATE
+
+				this.fullSpeed.set_value(constants.TILE_SIZE / 48)
+				return true
 			}
 		}
 	}

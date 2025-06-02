@@ -2,15 +2,15 @@ import { config, constants } from "../constants.js"
 import { Game } from "../core/game.js"
 import { Resizeable, YResizeable } from "../utils.js"
 import { Tileset } from "../world/tileset.js"
-import { Ui } from "./ui.js"
+import { UiPrototype } from "./ui.js"
 
 export class Widget{
     /**
      * !!! One shouldn't create a widget by using this constructor, use subclass widgets instead
      * @param {Game} game - The current game
      * @param {String} id - The widget's ID
-     * @param {Number} x - the x coordinates of the top-left corner of the widget
-     * @param {Number | YResizeable} y - the y coordinates of the top-left corner of the widget
+     * @param {Number} x - the x coordinates of the top-left corner of the widget, relative to the ui's center
+     * @param {Number | YResizeable} y - the y coordinates of the top-left corner of the widget, relative to the ui's center
      * @param {String} type - The widget's type
      * @param {Boolean} rendered - Boolean refearing to if this widget should be rendered
      * @param {Number} layer - The layer on which the widget will be rendered, higher numbers means that the widget will be rendered on top
@@ -25,7 +25,7 @@ export class Widget{
         this.type = type
         this.id = id
         this.layer = layer
-        /** @type {Ui} */
+        /** @type {UiPrototype} */
         this.ui = null
         this.rendered = rendered
         this.is_clicked = false
@@ -70,16 +70,25 @@ export class Label extends Widget{
             this.game.ctx.fillStyle = this.textcolor
             this.game.ctx.fillText(
                 this.text,
-                this.game.canvas.width / 2 + this.x.get(),
-                this.game.canvas.height / 2 + this.y.get() + this.fontsize.get() / 3)
+                this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                this.game.canvas.height / 2 + this.y.get() + this.fontsize.get() / 3 + this.ui.y_center.get())
             
             if(this.game.options_menu.debug){
                 this.game.ctx.beginPath()
-                this.game.ctx.arc(this.game.canvas.width / 2 + this.x.get(),
-                    this.game.canvas.height / 2 + this.y.get(),
+                this.game.ctx.arc(
+                    this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                    this.game.canvas.height / 2 + this.y.get() + this.ui.y_center.get(),
                     3, 0, Math.PI * 2)
                 this.game.ctx.fillStyle = "blue"
                 this.game.ctx.fill()
+                
+                this.game.ctx.strokeStyle = "blue"
+                this.game.ctx.strokeRect(
+                    this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                    this.game.canvas.height / 2 + this.y.get() - this.fontsize.get() / 2 + this.ui.y_center.get(),
+                    this.text.length * this.fontsize.get() / 2,
+                    this.fontsize.get()
+                )
             }
         }
     }
@@ -117,7 +126,7 @@ export class Button extends Widget{
      * @param {Number} width - The button's width
      * @param {Number | YResizeable} height - The button's height
      * @param {Boolean} rendered - Boolean refearing to if this widget should be rendered
-     * @param {(button: Button) => void} command - Command executed when the button is being cliked, the 'button' parameter refers to the actual object, which is being clicked
+     * @param {(button: Button, time: Number) => void} command - Command executed when the button is being cliked, the 'button' parameter refers to the actual object, which is being clicked
      */
     constructor(game, id, x, y, width, height, rendered, command){
         super(game, id, x, y, constants.BUTTON_TYPE, rendered, null)
@@ -127,6 +136,7 @@ export class Button extends Widget{
         else
             this.height = new Resizeable(game, height)
         this.command = command
+        this.should_execute = false
     }
 
     center_arround(x, y){
@@ -135,12 +145,41 @@ export class Button extends Widget{
         return this
     }
 
+    update(current_time){
+        if(!this.rendered) return
+        let x = this.game.inputHandler.mouse_pos.x
+        let y = this.game.inputHandler.mouse_pos.y
+        
+        if(
+            (this.x.get() + this.ui.x_center.get()) <= x
+            && (this.x.get() + this.width.get() + this.ui.x_center.get()) >= x
+            && (this.y.get() + this.ui.y_center.get()) <= y
+            && (this.y.get() + this.height.get() + this.ui.y_center.get()) >= y
+        ){
+            this.is_hovered = true
+            if(this.game.inputHandler.isMouseDown(0) || this.game.inputHandler.isMouseDown(2)){
+                this.is_clicked = true
+                if(this.game.inputHandler.isMousePressed(0) || this.game.inputHandler.isMousePressed(2))
+                    this.command(this, current_time)
+                    this.has_focus = true
+                    this.ui.focused_widgets.push(this)
+            } else {
+                this.is_clicked = false
+            }
+        } else {
+            this.is_hovered = false
+            if(this.game.inputHandler.isMouseDown(0) || this.game.inputHandler.isMouseDown(2))
+                this.has_focus = false
+                this.ui.focused_widgets.splice(this.ui.focused_widgets.indexOf(this), 1)
+        }
+    }
+
     render(){
         if(this.rendered && this.game.options_menu.debug){
             this.game.ctx.strokeStyle = "blue"
             this.game.ctx.strokeRect(
-                this.game.canvas.width / 2 + this.x.get(),
-                this.game.canvas.height / 2 + this.y.get(),
+                this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                this.game.canvas.height / 2 + this.y.get() + this.ui.y_center.get(),
                 this.width.get(), this.height.get()
             )
         }
@@ -153,7 +192,7 @@ export class Button extends Widget{
      * @param {Number} [width = null] - The button's width
      * @param {Number} [height = null] - The button's height
      * @param {Boolean} [rendered = null] - Boolean refearing to if this widget should be rendered
-     * @param {(button: Button) => void} [command = null] - Command executed when the button is being cliked, the 'button' parameter refers to the actual object, which is being clicked
+     * @param {(button: Button, time: Number) => void} [command = null] - Command executed when the button is being cliked, the 'button' parameter refers to the actual object, which is being clicked
      */
     update_config(x=null, y=null, width=null, height=null, rendered=null, command=null){
         if(x != null) this.x.set_value(x)
@@ -212,8 +251,8 @@ export class TextArea extends Widget{
             if(this.game.options_menu.debug){
                 this.game.ctx.strokeStyle = "blue"
                 this.game.ctx.strokeRect(
-                    this.game.canvas.width / 2 + this.x.get(),
-                    this.game.canvas.height / 2 + this.y.get(),
+                    this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                    this.game.canvas.height / 2 + this.y.get() + this.ui.y_center.get(),
                     this.width.get(), this.height.get()
                 )
             }
@@ -221,13 +260,56 @@ export class TextArea extends Widget{
             this.game.ctx.font = `${Math.round(this.fontsize.get())}px ${this.font}`
             this.game.ctx.fillText(
                 this.content + (this.has_bar ? this.blink_bar: ""),
-                this.game.canvas.width / 2 + this.x.get(),
-                this.y.get() + ((this.game.canvas.height + this.height.get()) / 2) + (this.fontsize.get() / 3)
+                this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                this.y.get() + ((this.game.canvas.height + this.height.get()) / 2) + (this.fontsize.get() / 3) + this.ui.y_center.get()
             )
         }
     }
 
+    // Overriden in the numberareas
+    check_char(char){return true}
+
     update(current_time){
+        if(!this.rendered) return
+        let x = this.game.inputHandler.mouse_pos.x
+        let y = this.game.inputHandler.mouse_pos.y
+        if(
+            (this.x.get() + this.ui.x_center.get()) <= x
+            && (this.x.get() + this.width.get() + this.ui.x_center.get()) >= x
+            && (this.y.get() + this.ui.y_center.get()) <= y
+            && (this.y.get() + this.height.get() + this.ui.y_center.get()) >= y
+        ){
+            this.is_hovered = true
+            if(this.game.inputHandler.isMouseDown(0) || this.game.inputHandler.isMouseDown(2)){
+                this.is_clicked = true
+                if(this.game.inputHandler.isMousePressed(0) || this.game.inputHandler.isMousePressed(2))
+                    this.has_focus = true
+                    this.ui.focused_widgets.push(this)
+            } else {
+                this.is_clicked = false
+            }
+        } else {
+            this.is_hovered = false
+            if(this.game.inputHandler.isMouseDown(0) || this.game.inputHandler.isMouseDown(2))
+                this.has_focus = false
+                this.ui.focused_widgets.splice(this.ui.focused_widgets.indexOf(this), 1)
+        }
+
+        if(this.has_focus && this.usable){
+            let key = this.game.inputHandler.get_down_keys()
+            if(key != null){
+                if(key.length == 1){
+                    if(this.content.length < this.max_char_number){
+                        if(this.check_char(key))
+                            this.content += key
+                    }
+                }else {
+                    if(key == "backspace")
+                        this.content = this.content.length !=0? this.content.slice(0, -1): ""
+                }
+            }
+        }
+
         if(this.has_focus){
             if(this.last_blink + 500 < current_time){
                 if(this.has_bar) this.has_bar = false
@@ -291,6 +373,10 @@ export class NumberArea extends TextArea{
         super(game, id, x, y, width, height, max_char_number, rendered, layer, fontsize, textcolor, font, blink_bar)
         this.type = constants.NUMBERAREA_TYPE
     }
+
+    check_char(char){
+        return ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(char)
+    }
 }
 
 export class Icon extends Widget{
@@ -321,8 +407,17 @@ export class Icon extends Widget{
         if(this.rendered){
             this.tileset.drawTile(
                 this.tile_nb,
-                this.game.canvas.width / 2 + this.x.get(),
-                this.game.canvas.height / 2 + this.y.get())
+                this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                this.game.canvas.height / 2 + this.y.get() + this.ui.y_center.get())
+            if(this.game.options_menu.debug){
+                this.game.ctx.strokeStyle = "grey"
+                this.game.ctx.strokeRect(
+                    this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                    this.game.canvas.height / 2 + this.y.get() + this.ui.y_center.get(),
+                    this.tileset.screen_tile_size.get(),
+                    this.tileset.screen_tile_size.get()
+                )
+            }
         }
     }
 
@@ -367,7 +462,7 @@ export class Texture extends Widget{
     }
 
     /**
-     * Image widget. Unlike the Icon, it doesn't use a tileset but directly a file instead. The create method is asyn and static
+     * Image widget. Unlike the Icon, it doesn't use a tileset but directly a file instead. The create method is async and static
      * @param {Game} game - The current game
      * @param {String} id - The widget's Id
      * @param {String} src - The path to the image file used by the widget
@@ -417,8 +512,8 @@ export class Texture extends Widget{
         if(this.rendered && this.img != null){
             this.game.ctx.drawImage(
                 this.img,
-                this.game.canvas.width / 2 + this.x.get(),
-                this.game.canvas.height / 2 + this.y.get(),
+                this.game.canvas.width / 2 + this.x.get() + this.ui.x_center.get(),
+                this.game.canvas.height / 2 + this.y.get() + this.ui.x_center.get(),
                 this.width.get(), this.height.get()
             )
         }
@@ -441,18 +536,80 @@ export class Texture extends Widget{
         if(rendered != null) this.rendered = rendered
         if(layer != null) this.layer = layer
     }
+}
+
+export class Window extends Widget{
+    /**
+     * Widget Allowing to make Uis in an Ui, like a pop-up or a window (unexpectedly)
+     * @param {Game} game - The current game
+     * @param {String} id - The widget's Id
+     * @param {UiPrototype} window_ui - The Ui contained in the window
+     * @param {Boolean} fast_exit - If true, then the window can be closed easily just by clicking outside of it
+     */
+    constructor(game, id, window_ui, fast_exit){
+        super(game, id, window_ui.x.get(), window_ui.y.get(), constants.WINDOW_TYPE, true, null)
+        this.window_ui = window_ui
+        this.window_ui.set_source(this)
+        this.fast_exit = fast_exit
+    }
+
+    render(){
+        if(this.ui.active_window == this){
+            this.window_ui.render()
+            if(this.game.options_menu.debug){
+                this.game.ctx.strokeStyle = "green"
+                this.game.ctx.strokeRect(
+                    this.x.get() + this.game.canvas.width / 2,
+                    this.y.get() + this.game.canvas.height / 2,
+                    this.window_ui.width.get(),
+                    this.window_ui.height.get()
+                )
+            }
+        }
+    }
+
+    update(current_time){
+        if(this.window_ui.is_finished){
+            this.ui.active_window = null
+            this.window_ui.is_finished = false
+        }
+        if(this.ui.active_window == this){
+            if(this.fast_exit){
+                if(this.game.inputHandler.isMousePressed(0) || this.game.inputHandler.isMousePressed(2)){
+                    if(this.x.get() > x || (this.x.get() + this.width.get()) < x || this.y.get() > y || (this.y.get() + this.height.get()) < y){
+                        this.window_ui.is_finished = true
+                    }
+                }
+            }
+            this.window_ui.update(current_time)
+        }
+    }
 
     /**
-     * Changes the image of the texture to an new one
-     * @param {String} src - The path to the new image file
-     * @returns 
+     * Method used to change the widget's fields, left 'null' in order to not change the corresponding field
+     * @param {Number} [x = null] - the x coordinates of the top-left corner of the widget
+     * @param {Number} [y = null] - the y coordinates of the top-left corner of the widget
+     * @param {Boolean} [rendered = null] - Boolean refearing to if this widget should be rendered
+     * @param {Number} [layer=null] - The layer on which the widget will be rendered, higher numbers means that the widget will be rendered on top
+     * @param {Boolean} [fast_exit=null] - If true, then the window can be closed easily just by clicking outside of it
      */
-    async change_image(src){
-        try {
-			await this.load(src)
-		} catch (error) {
-			console.error(`couldn't load file "${src}" : ${error.message}`)
-			return
-		}
+    update_config(x=null, y=null, rendered=null, layer=null, fast_exit=null){
+        if(x != null) {
+            this.x.set_value(x)
+            this.window_ui.x.set_value(x)
+            this.window_ui.x_center.set_value(this.window_ui.width.get() / 2 + this.x.get())
+        }
+        if(y != null){
+            this.y.set_value(y)
+            this.window_ui.y.set_value(y)
+            this.window_ui.y_center.set_value(this.window_ui.height.get() / 2 + this.y.get())
+        }
+        if(rendered != null) this.rendered = rendered
+        if(layer != null) this.layer = layer
+        if(fast_exit != null) this.fast_exit = fast_exit
+    }
+
+    activate(){
+        this.ui.active_window = this
     }
 }

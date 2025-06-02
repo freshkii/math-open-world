@@ -1,13 +1,8 @@
+#TODO: enhance mob AI
 #TODO: implement the whole map
-#TODO: introduction of "states" in entity class
-# the states define how the update will function, how the render will function
-# for instance, if the state is "attacking", there'll be a certain animation, the input will be handled in a certain way etc
-#TODO: implement the "block" tiles classes (so that they are not fully blocking the tile)
-#TODO: add mobs and get them AI driven
-#TODO: inventory
 #TODO: add problems
 
-#FIX: rendering by layers
+#FIX: Stripped rendering effect (strange lines behaviour)
 
 # Maybe we could separate collision hitboxes and action hitboxes by making sub-classes
 # As collision hitboxes' commands are not meant to ever be triggered
@@ -15,3 +10,5 @@
 # that would lighten the code from it's many generated hitboxes that all have a empty command
 #
 # Idk i was just thinking smth like that
+#
+# Good one ! we might keep it for later (when we'll optimize this code)
