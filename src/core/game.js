@@ -19,7 +19,7 @@ import { Spider } from '../entities/mobs/spider.js'
 import { OptionsMenu } from '../ui/options.js'
 import { AudioManager } from './audioManager.js'
 import { Inventory } from '../ui/inventory.js'
-import { Consumable, Item, ItemStack} from '../ui/items.js'
+import { Consumable, Item, ItemStack, Passive} from '../ui/items.js'
 
 
 export class Game {
@@ -97,48 +97,62 @@ export class Game {
 		this.options_menu = null
 		
 		this.effects = {
-			MOTIONLESS: new Effect((entity) => {
-				entity.e.fullSpeed = entity.new_fullSpeed
-				entity.e.direction = entity.direction
-			}, (entity) => {
-				entity.direction = entity.e.direction
-				entity.fullSpeed = entity.e.fullSpeed
-				if(entity.e.dashing)
-					entity.fullSpeed.set_value(constants.TILE_SIZE / 12)
-				entity.new_fullSpeed = new Resizeable(this, 0)
+			MOTIONLESS: new Effect(instance => {
+				instance.entity.fullSpeed = instance.new_fullSpeed
+				instance.entity.direction = instance.direction
+			}, instance => {
+				instance.direction = instance.entity.direction
+				instance.fullSpeed = instance.entity.fullSpeed
+				if(instance.entity.dashing)
+					instance.fullSpeed.set_value(constants.TILE_SIZE / 12)
+				instance.new_fullSpeed = new Resizeable(this, 0)
 
-				entity.e.fullSpeed = entity.new_fullSpeed
-				entity.e.direction = entity.direction
-			}, (entity) => {
-				entity.e.fullSpeed = entity.fullSpeed
-				entity.e.direction = entity.direction
+				instance.entity.fullSpeed = instance.new_fullSpeed
+				instance.entity.direction = instance.direction
+			}, instance => {
+				instance.entity.fullSpeed = instance.fullSpeed
+				instance.entity.direction = instance.direction
 			}, 0),
-			ATTACK: new Effect((e) => {}, (entity) => {
-				entity.state = entity.e.state
-				entity.e.state = constants.ATTACK_STATE
-			}, (entity) => {
-				entity.e.state = entity.state
+			ATTACK: new Effect(instance => {}, instance => {
+				instance.state = instance.entity.state
+				instance.entity.state = constants.ATTACK_STATE
+			}, instance => {
+				instance.entity.state = instance.state
 			}, 1000),
-			BLINK: new Effect((e) => {}, (entity) => {
-				entity.map = entity.e.map, entity.e.map = null
-			}, (entity) => {
-				entity.e.map = entity.map
+			BLINK: new Effect(instance => {}, instance => {
+				instance.map = instance.entity.map
+				instance.entity.map = null
+			}, instance => {
+				instance.entity.map = instance.map
 			}, 0),
-			SPEED1: new Effect((entity) => {
-				entity.e.fullSpeed.set_value(constants.TILE_SIZE / 6)
-			}, (entity) => {
-				entity.speed_before = entity.e.fullSpeed.get()
-			}, (entity) => {
-				entity.e.fullSpeed.set_value(entity.speed_before)
+			SPEED1: new Effect(instance => {
+				instance.entity.fullSpeed.set_value(constants.TILE_SIZE / 6)
+			}, instance => {
+				instance.speed_before = instance.entity.fullSpeed.get()
+			}, instance => {
+				instance.entity.fullSpeed.set_value(instance.speed_before)
 			}, 0),
-			SPEED2: new Effect((entity) => {
-				entity.e.fullSpeed.set_value(constants.TILE_SIZE / 4)
-			}, (entity) => {
-				entity.speed_before = entity.e.fullSpeed.get()
-			}, (entity) => {
-				entity.e.fullSpeed.set_value(entity.speed_before)
-			}, 0)
+			SPEED2: new Effect(instance => {
+				instance.entity.fullSpeed.set_value(constants.TILE_SIZE / 4)
+			}, instance => {
+				instance.speed_before = instance.entity.fullSpeed.get()
+			}, instance => {
+				instance.entity.fullSpeed.set_value(instance.speed_before)
+			}, 0),
+			// Just so you know, that's just a joke/test huh
+			BIG_HITBOX: new Effect(instance => {},
+				instance => {
+					instance.entity.collision_hitbox.width.set_value(instance.entity.collision_hitbox.width.get() * 1.49)
+					instance.entity.collision_hitbox.height.set_value(instance.entity.collision_hitbox.height.get() * 1.49)
+				}, instance => {
+					instance.entity.collision_hitbox.width.set_value(instance.entity.collision_hitbox.width.get() / 1.49)
+					instance.entity.collision_hitbox.height.set_value(instance.entity.collision_hitbox.height.get() / 1.49)
+				}
+			)
 		}
+
+		/**@type {Array<{command: () => void, delay: Number, activation_time: Number}>} */
+		this.planned = []
 	}
 
 	async run() {
@@ -165,14 +179,22 @@ export class Game {
 		await Tileset.create(this, "selection_cursor.png", 16, constants.TILE_SIZE / 2, 0)
 		await Tileset.create(this, "checkbox_tileset.png", 32, constants.TILE_SIZE / 2, 0)
 		await Tileset.create(this, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
+		await Tileset.create(this, "inventory_tooltip_tileset.png", 16, constants.TILE_SIZE / 4, 0)
 
-		await Map.create(this, 'house.json', "black", {x: constants.TILE_SIZE * 1.5, y: 3 * constants.TILE_SIZE}),
+		await Tileset.create(this, "digital_locks.png", 20, constants.TILE_SIZE, 0)
+		await Tileset.create(this, "Game Boy Advance - The Legend of Zelda The Minish Cap - Lon Lon Ranch.png", 16, constants.TILE_SIZE, 0)
+		await Tileset.create(this, "Game Boy Advance - The Legend of Zelda The Minish Cap - Hyrule Town.png", 16, constants.TILE_SIZE, 0)
+
+		await Tileset.create(this, "firefly.png", 16, constants.TILE_SIZE, 0)
+
+		await Map.create(this, 'house.json', "black", {x: constants.TILE_SIZE * 1.5, y: 3 * constants.TILE_SIZE})
 		await Map.create(this, 'map.json', "grey", {x: 15.5 * constants.TILE_SIZE, y: 14.01 * constants.TILE_SIZE})
 		await Map.create(this, 'new_map.json', "grey", {x: 116.5 * constants.TILE_SIZE, y: 80.5 * constants.TILE_SIZE})
+		await Map.create(this, 'map 2.json', "grey", {x: 184.5, y:93.5})
 
 		this.options_menu = await OptionsMenu.create(this)
 		
-		this.current_map = "house" // "scene"
+		this.current_map = "map 2" // "scene"
 		this.map = this.maps[this.current_map]
 
 		// test entities
@@ -180,6 +202,7 @@ export class Game {
 		new Frog(this, this.maps["new_map"], constants.TILE_SIZE * 117, constants.TILE_SIZE * 86)
 
 		const inventory = await Inventory.create(this, "inventory.png")
+		this.inventory_unlocked = false
 		this.player = new Player(this, this.tilesets["Kanji"], inventory)
 
 		const draggable = new Entity(
@@ -210,21 +233,26 @@ export class Game {
 
 		const black_transition = new UnicoloreTransition(this, 500, "black")
 
-		const test_consumable = await Consumable.create(this, "Item_71.png", "example_item",
+		const test_consumable = await Consumable.create(this, "Item_71.png", "Feather",
 			(c, time) => {this.effects.SPEED2.apply(time, this.player, 10000)}
 		)
-		const test_consumable_stack = new ItemStack(test_consumable, 1);
-		inventory.add_items([test_consumable_stack])
+    
+		const test_consumable_stack = new ItemStack(test_consumable, 1)
+		inventory.add_items(test_consumable_stack)
 		
-		const test_item = await Item.create(this, "Item_51.png", "example_item");
-		const test_item_stack = new ItemStack(test_item, 1);
-		inventory.add_items([test_item_stack])
+		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
+			// Totally temporary
+			this.effects.BIG_HITBOX.apply(time, this.player, 100)
+		//this.effects.BIG_HITBOX.apply(time, this.player, 100) it's very annoying so i'll turn that off for a bit
+	})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
+		const test_item_stack = new ItemStack(test_item, 1)
+		inventory.add_items(test_item_stack)
 
-		const test_consumable2 = await Consumable.create(this, "Item_Black3.png", "example_item",
+		const test_consumable2 = (await Consumable.create(this, "Item_Black3.png", "Speed Potion",
 			(c, time) => {this.effects.SPEED1.apply(time, this.player, 10000)}
-		);
-		const test_consumable_stack2 = new ItemStack(test_consumable2, 5);
-		inventory.add_items([test_consumable_stack2])
+		)).set_tooltip("Drinking this potion makes you faster for a certain period")
+		const test_consumable_stack2 = new ItemStack(test_consumable2, 5)
+		inventory.add_items(test_consumable_stack2)
 
 		const colors_problem = await Problem.create(
 			this, "book_ui.png", this.canvas.width * 0.34375, this.canvas.width * 0.453125, ["3", "4", "4"], (problem) => {
@@ -315,6 +343,7 @@ export class Game {
 					numberarea_pink.usable = false
 					numberarea_blue.usable = false
 					numberarea_red.usable = false
+					this.inventory_unlocked = true
 					problem.unfocus()
 				}	
 			}
@@ -419,8 +448,8 @@ export class Game {
 			79 * constants.TILE_SIZE,
 			constants.TILE_SIZE,
 			constants.TILE_SIZE / 4, 
-			false, 
-			false, 
+			false,
+			false,
 			null, 
 			(h, c_h, time) => {
 				if(!c_h.player) return
@@ -595,7 +624,7 @@ export class Game {
 			await Texture.create(this, "hovered-texture", "hovered_lost_light_texture.png", 0, 0,
 				constants.TILE_SIZE * 0.8, constants.TILE_SIZE * 0.8, false, 1)
 		]
-		for(let x=0; x < 5; x++){
+		for (let x=0; x < 5; x++){
 			for(let y=0; y<5; y++){
 				lost_lights_widgets.push(new Button(this, `button-${x}-${y}`,
 					(x - 2.5) * constants.TILE_SIZE * 0.8, (y - 2.5) * constants.TILE_SIZE * 0.8,
@@ -655,8 +684,211 @@ export class Game {
 				}
 			})
 
+		let digital_locks_widgets = []
+		for (let i = 0; i < 4; i++) {
+			digital_locks_widgets.push(
+				new Button(this, `button-${i}`, (i-2) * constants.TILE_SIZE * 1.2, 0.5 * constants.TILE_SIZE, constants.TILE_SIZE, constants.TILE_SIZE, true, (button, time) => {
+					if (button.value === undefined)
+						button.value = 0
+					else
+						button.value = (button.value + 1) % 4
+					// reset
+					for (let j = 1; j < 5; j++) {
+						button.ui.get_widget(`icon-${i}-${j}`).rendered = false
+					}
+					button.ui.get_widget(`icon-${i}-${button.value+1}`).rendered = true
+				})
+			)
+			for (let j = 1; j < 5; j++)
+				digital_locks_widgets.push(
+					new Icon(this, `icon-${i}-${j}`, (i-2) * constants.TILE_SIZE * 1.2, 0.5 * constants.TILE_SIZE, this.tilesets["digital_locks"], j)
+				)
+		}
+		const digital_locks_problem = await Problem.create(this, "digital_locks_background.png", 
+			constants.TILE_SIZE * 6, constants.TILE_SIZE * 5, 3210, (problem) => {
+				let result = 0
+				for (let i = 0; i < 4; i++)
+					result += problem.get_widget(`button-${i}`).value * Math.pow(10, i)
+				return result
+			}, digital_locks_widgets, (problem, time) => {
+				if (problem.solved())
+					problem.is_finished = true
+		})
+
+		/*
+		  we're dividing the space following a grid
+		  . | . | * | . | g
+		  . | . | * | . | *
+		  * | * | m | * | m
+		  . | . | * | . | *
+		  c | * | m | . | *
+		  * = a place the light can go through
+		  c = starting cristal
+		  g = goal
+		  m = mirror
+
+		 */
+		//TODO: the tileset must be like that, 
+		//first 4 are mirrors (left, up, right, down)
+		//then for each direction 3 (reflecting, and then obstacles clockwisely arranged
+		//unpowered cristal, powered cristal
+		//then unsolved goal, solved goal, 
+		//then horizontal light and vertical light
+		/*
+		const layout = [
+			"...g.",
+			"...*.",
+			"**m*m",
+			"...*.",
+			"c*m.."
+		]
+
+		let mirrors_widgets = []
+
+		const nearLight = (ui, x, y) => {
+			coords = []
+			if (x > 0) coords.push([x-1, y])
+			if (x < 4) coords.push([x+1, y])
+			if (y > 0) coords.push([x, y-1])
+			if (y < 4) coords.push([x, y+1])
+			return coords.some(c => ui.get_widget(`light-icon-${c.x}-${c.y}`).rendered)
+		}
+
+		const clearLights = (ui) => {
+			for (let j = 0; j < 5; j++) {
+				for (let i = 0; i < 5; i++) {
+					if (layout[j][i] === '*') {
+						ui.get_widget(`light-icon-h-${i}-${j}`).rendered = false
+						ui.get_widget(`light-icon-v-${i}-${j}`).rendered = false
+					}
+				}
+			}
+		}
+
+		// if you call this, the cristal is powered
+		const makeLightPath = (problem) => {
+			// start from blank
+			clearLights(problem)
+
+			let direction = 2 // right
+
+			let dx = 1
+			let dy = 0
+			let x = 0
+			let y = 4
+
+			while (true) {
+				x += dx
+				y += dy
+				if (x < 0 || x > 4 || y < 0 || y > 4) light_stopped = true
+
+				if (layout[y][x] === 'g') {
+					problem.get_widget(`goal-icon-${x}-${y}`).tile_nb = 20
+					problem.is_solved = true
+					break
+				} else if (layout[y][x] === '*') {
+					problem.get_widget(`light-icon-${x}-${y}`).tile_nb = direction === 2 || direction === 0 ? 21 : 22 // 21 : horizontal, 22: vertical
+					continue
+				}
+
+				// then layout[y][x] === 'm'
+				const mirror_direction = problem.get_widget(`mirror-button-${x}-${y}`).value
+				if (!(direction in [mirror_direction, (mirror_direction+1)%4])) {
+					problem.get_widget(`mirror-icon-${x}-${y}`).tile_nb = 4 + 3 * mirror_direction + Math.abs(((mirror_direction + 1)%4-direction))
+					break
+				}
+
+				// then direction is in [mirror_direction, ...]
+				problem.get_widget(`mirror-icon-${x}-${y}`).tile_nb = 4 + 3 * mirror_direction
+				direction = direction === mirror_direction ? (mirror_direction+1)%4 : mirror_direction
+				switch(direction) {
+					case 0: // left
+						x = -1
+						y = 0
+						break
+					case 1: // up
+						x = 0
+						y = -1
+						break
+					case 2: // right
+						x = 1
+						y = 0
+						break
+					case 3: // down
+						x = 0
+						y = 1
+						break
+				}
+			}
+		}
+
+		for (let y = 0; y < 5; y++) {
+			for (let x = 0; x < 5; x++) {
+				const posX = (x - 2.5) * constants.TILE_SIZE
+				const posY = (y - 2.5) * constants.TILE_SIZE
+				const c = layout[y][x]
+				switch(c) {
+					case 'c': // cristal
+						mirrors_widgets.push(
+							new Icon(this, `goal-icon-${x}-${y}`, posX, posY, this.tilesets["mirrors"], 17) // 17 = not lighting cristal, 18 = lighting cristal
+						)
+						break
+					case 'm': // mirror
+						const direction = Math.floor(Math.random() * 3)
+
+						const button = new Button(this, `mirror-button-${x}-${y}`, posX, posY, constants.TILE_SIZE, constants.TILE_SIZE, true, (button, time) => {
+							button.value = (button.value + 1) % 4 // 0 = up-left, 1 = up-right, 2 = down-right, 3 = down-left 
+							if (nearLight(button.ui, x, y)) // if there was a light near then you must remake the light path
+								makeLightPath(button.ui)
+						})
+						button.value = direction
+						mirrors_widgets.push(
+							button
+						)
+
+						mirrors_widgets.push(
+							new Icon(this, `mirror-icon-${x}-${y}`, posX, posY, this.tilesets["mirrors"], direction + 1)
+						)
+						break
+					case '*': // light
+						mirrors_widgets.push(
+							new Icon(this, `light-icon-${x}-${y}`, posX, posY, this.tilesets["mirrors"], 21, false) // 21 = horizontal light, 22 = vertical light
+						)
+						break
+					case 'g': // goal
+						mirrors_widgets.push(
+							new Icon(this, `goal-icon-${x}-${y}`, posX, posY, this.tilesets["mirrors"], 19) // 19 = unpowered, 20 = powered
+						)
+						break
+				}
+			}
+		}
+
+		const mirror_puzzle_problem = await Problem.create(
+			this, 
+			"mirror_puzzle.png",
+			constants.TILE_SIZE,
+			constants.TILE_SIZE,
+			true,
+			(problem) => {
+				makeLightPath(problem);
+				return problem.is_solved;
+			}, 
+			mirrors_widgets,
+			(problem, time) => {
+				if (problem.solved) {
+					problem.is_finished = true;
+				}
+			}
+		)
+		*/
+
+
+
 		// Uncomment if you want to test the problem:
-		//this.current_ui = lost_lights_problem
+		// this.current_ui = digital_locks_problem
+		// this.current_ui = lost_lights_problem 
+		// this.current_ui = mirror_puzzle_problem
 
 		requestAnimationFrame(this.loop.bind(this))
 	}
@@ -667,10 +899,17 @@ export class Game {
 	 * @returns 
 	 */
 	update(current_time) {
+		this.planned.forEach(command => {
+			if(command.delay == 0){
+				command.command()
+				this.planned.splice(this.planned.indexOf(command), 1)
+			}
+		})
+		this.planned.forEach(command => command.delay--)
 		this.collision_hitboxes = this.collision_hitboxes.filter(h => h.active)
 		this.combat_hitboxes = this.combat_hitboxes.filter(h => h.active)
 		this.hitboxes = this.hitboxes.filter(h => h.active)
-		this.entities = this.entities.filter(e => e.active)
+		this.entities = this.entities.filter(entity => entity.active)
 
 		if(this.current_ui) {
 			if(this.current_ui.is_finished){
@@ -713,8 +952,6 @@ export class Game {
 		Object.values(this.effects).forEach(effect => effect.update(current_time))
 
 		this.talkables.forEach(talkable => {talkable.update()})
-
-		this.player.inventory.update(current_time)
 	}
 
 	render() {
@@ -768,5 +1005,15 @@ export class Game {
 	 */
 	get_current_map(){
 		return this.maps[this.current_map]
+	}
+
+	/**
+	 * Allows to plan out command to be executed after a certain amount of updates,
+	 * ⚠ make sure that the values that you use in the command still exist after that amount of update
+	 * @param {() => void} command 
+	 * @param {number} delay 
+	 */
+	plan(command, delay){
+		this.planned.push({command: command, delay: delay})
 	}
 }

@@ -23,6 +23,16 @@ export const constants = {
     NUMBERAREA_TYPE: "numberarea",
     ICON_TYPE: "icon",
     TEXTURE_TYPE: "texture",
+    WINDOW_TYPE: "window",
+    WIDGET_PRIORITIES: {
+        "window": 3,
+        "button": 2,
+        "textarea": 2,
+        "numberarea": 2,
+        "label": 1,
+        "texture": 0,
+        "icon": 0
+    },
 
     UP_KEY: "z",
     DOWN_KEY: "s",
@@ -104,7 +114,8 @@ export const collisions = {
 		685: {y:56, height:32},
 		723: {x:40, y:32, height:80, width:48}
 	},
-	"map_multi_ts.json": {}
+	"map_multi_ts.json": {},
+	"map 2.json": {}
 }
 
 
@@ -143,5 +154,6 @@ export const blockDepthOrder = {
         114,
         76  
 	],
-	"map_multi_ts.json": []
+	"map_multi_ts.json": [],
+	"map 2.json": []
 }

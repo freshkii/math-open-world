@@ -21,9 +21,8 @@ export class Frog extends Mob {
             worldX, worldY, 200,
             new Ai(game).set_wandering(constants.TILE_SIZE / 35, constants.TILE_SIZE * 2, 3000), 5,
             {combat: {x: constants.TILE_SIZE * 0.015625, y: constants.TILE_SIZE * 0.0625},
-            collision: {x: constants.TILE_SIZE * 0.015625, y: constants.TILE_SIZE * 0.0625}}
+            collision: {x: constants.TILE_SIZE * 0.015625, y: constants.TILE_SIZE * 0.0625}}, "Frog"
 		)
-
         this.framesPerState = [5, 3]
     }
 }
