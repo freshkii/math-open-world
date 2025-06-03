@@ -7,20 +7,6 @@ import { Tileset } from "../world/tileset.js"
 import { Hitbox } from "./hitbox.js"
 import { Ai } from "./ai.js"
 
-/**
- * @typedef {Object} MobAI
- * @property {string} state - The current AI state (STILL_AI_STATE, WANDERING_AI_STATE, CHASING_AI_STATE)
- * @property {Resizeable} [wandering_speed] - Movement speed when wandering
- * @property {Resizeable} [wandering_radius] - Max distance from center when wandering
- * @property {number} [wandering_direction_change_time] - Time between direction changes (ms)
- * @property {Resizeable} [vision_range] - Detection range for chasing player
- * @property {Boolean} [follower] - Whether the entity follows the player forever or not
- * @property {number} [attack_cooldown] - Time between attacks (ms)
- * @property {Resizeable} [attack_range] - Range for attacking player
- * @property {boolean} [hostile] - Whether the mob attacks the player
- * @property {Resizeable} [chasing_speed] - Movement speed when chasing
- */
-
 
 export class Mob extends Entity {
     /**
