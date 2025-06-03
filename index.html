@@ -1,14 +1,39 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="fr">
 <head>
-	<meta charset='UTF-8'>
-	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
-	<link rel='icon' type='image/x-icon' href='assets/images/favicon.ico'>
-	<link rel="stylesheet" href="style.css">
-	<title>MOW</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>MOW</title>
 </head>
 <body>
-	<canvas id='game'></canvas>
-	<script type='module' src='script.js' defer></script>
+    <div id="home-screen">
+        <h1 class="title-3d">Math Open World</h1>
+        <form id="account-form">
+            <input type="text" id="username" placeholder="Nom d'utilisateur" autocomplete="username" required>
+            <input type="password" id="password" placeholder="Mot de passe" autocomplete="current-password" required>
+            <button id="play-btn" type="submit">Jouer</button>
+            <button id="logout-btn" type="button" style="display:none; margin-top:0.5em;">Déconnexion</button>
+        </form>
+        <button id="info-btn" class="info-btn">À propos du jeu</button>
+    </div>
+    <div id="info-popup" class="popup" style="display:none;">
+        <div class="popup-content">
+            <span id="close-popup" class="close">&times;</span>
+            <h2>À propos du jeu</h2>
+            <p>
+                °Math Open World: jeu éducatif où tu explores un monde rempli de défis mathématiques.<br>
+                °Résous des énigmes, progresse et améliore tes compétences en maths !<br>
+				°Résous des énigmes, progresse et améliore tes compétences en maths !<br>
+                <strong>°Développé par : Classe de 1er3 2024-2025-NSI</strong><br>
+				<strong>°Chef de projet : ARABOV ISKANDAR</strong><br>
+
+            </p>
+        </div>
+    </div>
+    <canvas id="game" style="display:none;"></canvas>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
