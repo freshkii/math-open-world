@@ -19,11 +19,11 @@ export class Entity {
     * @param {number} [life=null] - The entity's life, the entity is being invincible if life is null
     * @param {{ combat: { x: Number, y: Number; }; collision: { x: Number, y: Number; }; }} [hitboxes_offset={combat:{x:0,y:0},collision:{x:0,y:0}}] - The entity's hitboxes' offset in case you need them to be a little bit offcentered
     */
-    constructor(game, map, tileset, collision_hitbox, combat_hitbox, worldX, worldY, animation_duration, life=null, hitboxes_offset={combat:{x:0,y:0},collision:{x:0,y:0}}, bottom_y=null, draggable=false) {
+    constructor(game, map, tileset, collision_hitbox, combat_hitbox, worldX, worldY, animation_duration, life=null, hitboxes_offset={combat:{x:0,y:0},collision:{x:0,y:0}}, bottom_y=null, draggable=false, type="") {
 
         this.game = game
         this.map = map
-        this.type =type
+        this.type = type
 		this.id = game.next_entity_id
 		game.next_entity_id++
 
@@ -130,14 +130,6 @@ export class Entity {
 		this.combat_hitbox.get_colliding_hitboxes(false, false).forEach(hitbox => {
 			hitbox.command(hitbox, this.combat_hitbox, current_time)
 		})
-
-        if(this.dx.get() == 0 && this.dy.get() == 0){
-            if(this.state == constants.WALK_STATE)
-                this.state = constants.IDLE_STATE
-        } else {
-            if (this.state == constants.IDLE_STATE)
-                this.state = constants.WALK_STATE
-        }
 
         this.handleAnimation(current_time)
     }

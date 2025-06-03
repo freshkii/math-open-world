@@ -170,6 +170,14 @@ export class Player extends Entity {
 
 		this.inventory.update_passive_effects(current_time)
 
+		if(this.dx.get() == 0 && this.dy.get() == 0){
+            if(this.state == constants.WALK_STATE)
+                this.state = constants.IDLE_STATE
+        } else {
+            if (this.state == constants.IDLE_STATE)
+                this.state = constants.WALK_STATE
+        }
+
 		super.update(current_time)
 		super.updateHitboxes()
 	}
