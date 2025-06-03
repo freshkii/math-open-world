@@ -114,7 +114,8 @@ export const collisions = {
 		685: {y:56, height:32},
 		723: {x:40, y:32, height:80, width:48}
 	},
-	"map_multi_ts.json": {}
+	"map_multi_ts.json": {},
+	"map 2.json": {}
 }
 
 
@@ -153,5 +154,6 @@ export const blockDepthOrder = {
         114,
         76  
 	],
-	"map_multi_ts.json": []
+	"map_multi_ts.json": [],
+	"map 2.json": []
 }

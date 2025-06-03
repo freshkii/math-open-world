@@ -351,10 +351,16 @@ export class Inventory extends Ui{
                     this.shift_items(i);
                 }else{
                     this.get_widget(`item-count-${i}`).update_config(null, null, slot.count)
-                    if(slot.passive){
-                        slot.item.effect(slot.item, current_time)
-                    }
                 }
+            }
+        }
+    }
+
+    update_passive_effects(current_time){
+        for(let i = 0; i < 9; i++){
+            let slot = this.get_slot(i)
+            if(slot?.passive){
+                slot.item.effect(slot.item, current_time)
             }
         }
     }

@@ -168,6 +168,8 @@ export class Player extends Entity {
             }
         }
 
+		this.inventory.update_passive_effects(current_time)
+
 		super.update(current_time)
 		super.updateHitboxes()
 	}
