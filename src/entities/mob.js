@@ -107,10 +107,10 @@ export class Mob extends Entity {
         super.update(current_time)
     }
 
-    manage_states_update(currentime){
+    manage_states_update(current_time){
         //console.log()
         if (this.ai.follower){
-            this.updateChasing(currentime)
+            this.updateChasing(current_time)
             return
         }
         if (this.ai.hostile) {
@@ -127,19 +127,19 @@ export class Mob extends Entity {
                 // console.log('je suis 2')
                 if (this.ai.state === constants.RUSH_AI_STATE){
                     // console.log("test")
-                    this.updateRushing(currentime)
+                    this.updateRushing(current_time)
                     return
                 }
                 if (d <= this.ai.vision_range.get()) {
-                    if ((currentime - this.last_rush_time >=  this.rush_pause_duration) || (d<=this.ai.rush_activation_range.get() && currentime - this.last_rush_time >=  this.rush_pause_duration/2)) {
+                    if ((current_time - this.last_rush_time >=  this.rush_pause_duration) || (d<=this.ai.rush_activation_range.get() && current_time - this.last_rush_time >=  this.rush_pause_duration/2)) {
                         //console.log("je rush")
                         this.ai_state = constants.RUSH_AI_STATE
-                        this.last_dash = currentime
-                        this.updateRushing(currentime)
+                        this.last_dash = current_time
+                        this.updateRushing(current_time)
                         return
                     }
                     this.ai.state = constants.Longrangeattacking_AI_STATE
-                    this.updateLongrangeattacking(currentime)
+                    this.updateLongrangeattacking(current_time)
                     return
                 }
                 //faudra peut être faire en sorte que parfois il rush, qnd le mec est trop près par exemple 
@@ -148,19 +148,19 @@ export class Mob extends Entity {
                 this.state = constants.WALK_STATE
                 // console.log('je viens à toi, hihi')
                 if (this.ai.state === constants.RUSH_AI_STATE){
-                    this.updateRushing(currentime)
+                    this.updateRushing(current_time)
                     return
                 }
                 if (d <= this.ai.vision_range.get()) {
-                    if (currentime - this.last_rush_time >=  this.rush_pause_duration) {
+                    if (current_time - this.last_rush_time >=  this.rush_pause_duration) {
                         //console.log("je rush")
                         this.ai_state = constants.RUSH_AI_STATE
-                        this.last_dash = currentime
-                        this.updateRushing(currentime)
+                        this.last_dash = current_time
+                        this.updateRushing(current_time)
                         return
                     }
                     this.ai.state = constants.CHASING_AI_STATE
-                    this.updateChasing(currentime)
+                    this.updateChasing(current_time)
                     return
                 }
             } else if (this.ai.is_long_range){
@@ -168,7 +168,7 @@ export class Mob extends Entity {
                 // changer le AI state
                 // console.log("je vais danser")
                 this.ai.state = constants.Longrangeattacking_AI_STATE
-                this.updateLongrangeattacking(currentime)
+                this.updateLongrangeattacking(current_time)
                 return
             }
         }
@@ -180,7 +180,7 @@ export class Mob extends Entity {
 			this.center_point.y = this.worldY
         }
         //console.log("où suis-je?")
-        this.updateWandering(currentime)
+        this.updateWandering(current_time)
     }
         
     changeWanderingDirection(current_time) {

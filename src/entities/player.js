@@ -62,16 +62,16 @@ export class Player extends Entity {
         }
     }
 
-	updateDash(currentTime) {
-		if (!this.dashing && this.inputHandler.isKeyDown(constants.DASH_KEY) && currentTime - this.last_dash >= constants.PLAYER_DASH_COOLDOWN) {
+	updateDash(current_time) {
+		if (!this.dashing && this.inputHandler.isKeyDown(constants.DASH_KEY) && current_time - this.last_dash >= constants.PLAYER_DASH_COOLDOWN) {
 			this.dashing = true
 			this.acceleration.set_value(constants.TILE_SIZE / 24)
 			this.fullSpeed.set_value(constants.TILE_SIZE / 6)
-			this.last_dash = currentTime
+			this.last_dash = current_time
 		}
 
-		if (this.dashing && currentTime - this.last_dash >= constants.PLAYER_DASH_DURATION) {
-			this.last_dash = this.dash_reset ? 0 : currentTime
+		if (this.dashing && current_time - this.last_dash >= constants.PLAYER_DASH_DURATION) {
+			this.last_dash = this.dash_reset ? 0 : current_time
 			this.dash_reset = false
 			this.dashing = false
 
@@ -240,21 +240,21 @@ export class Player extends Entity {
 		this.worldY.set_value(clamp(y, constants.PLAYER_COMBAT_BOX_HEIGHT/2, this.map.world.height.get() - constants.PLAYER_COMBAT_BOX_HEIGHT/2))
 	}
 
-	updateIdle(currentTime) {
+	updateIdle(current_time) {
 		this.handleMoveInput()
-		this.handleAttackInput(currentTime)
+		this.handleAttackInput(current_time)
 
-		if (this.handleDragInput(currentTime)) {
+		if (this.handleDragInput(current_time)) {
 			return
 		}
 
 		this.updateMovements()
-		this.updateDash(currentTime)
-		super.update(currentTime)
+		this.updateDash(current_time)
+		super.update(current_time)
 	}
 
-	updateWalk(currentTime) {
-		this.updateIdle(currentTime) // we'll keep it as is till it breaks
+	updateWalk(current_time) {
+		this.updateIdle(current_time) // we'll keep it as is till it breaks
 	}
 
 	handleMoveInput() {
@@ -276,7 +276,7 @@ export class Player extends Entity {
 		}
 	}
 
-	handleAttackInput(currentTime) {
+	handleAttackInput(current_time) {
 		if (this.inputHandler.isMousePressed(constants.MOUSE_RIGHT_BUTTON)) {
 			if (this.remaining_attacks>0){
 			const playerWorldX = this.worldX.get()
@@ -298,10 +298,10 @@ export class Player extends Entity {
 			
 			const hb = new Hitbox(this.game, this.game.get_current_map(), playerWorldX, playerWorldY,
 				constants.TILE_SIZE / 2, constants.TILE_SIZE / 2, false, false)
-			new ProjectileAttack(this.game, this, this.game.get_current_map(), currentTime,
-				2000, [hb], velX, velY,(e) => { e.life -= 2; this.game.effects.BLINK.apply(currentTime, e, 200) }, false, this.game.tilesets["Axe"], 50,
+			new ProjectileAttack(this.game, this, this.game.get_current_map(), current_time,
+				2000, [hb], velX, velY,(e) => { e.life -= 2; this.game.effects.BLINK.apply(current_time, e, 200) }, false, this.game.tilesets["Axe"], 50,
 				{x: playerWorldX - hb.width.get() / 2, y: playerWorldY - hb.height.get() /2})
-			this.attack_time=currentTime
+			this.attack_time=current_time
 			this.remaining_attacks-=1
 
 		}}
@@ -313,23 +313,23 @@ export class Player extends Entity {
 				this.updateDirectionFromMouse()
 			}
 
-			this.game.effects.ATTACK.apply(currentTime,this, 300)
-			this.game.effects.MOTIONLESS.apply(currentTime, this, 300)
+			this.game.effects.ATTACK.apply(current_time,this, 300)
+			this.game.effects.MOTIONLESS.apply(current_time, this, 300)
 
-			new SwingingAttack(this.game, this, this.game.get_current_map(), currentTime, 300,
+			new SwingingAttack(this.game, this, this.game.get_current_map(), current_time, 300,
 				{x: this.worldX.get(), y: this.worldY.get()}, this.direction,
 				constants.TILE_SIZE/5, constants.TILE_SIZE, constants.TILE_SIZE/2,
-				(e) => { e.life -= 2 ; this.game.effects.BLINK.apply(currentTime, e, 200)})
+				(e) => { e.life -= 2 ; this.game.effects.BLINK.apply(current_time, e, 200)})
 			this.game.audioManager.playSound('game', 'slash', 0.5)
 			this.state = constants.ATTACK_STATE
 		}
 	}
 
-	updateAttack(currentTime) {
+	updateAttack(current_time) {
 		// pretty much nothing
 	}
 
-	updateDrag(currentTime) {
+	updateDrag(current_time) {
 		if (this.inputHandler.isKeyPressed(constants.DRAG_KEY)) {
 			this.state = constants.IDLE_STATE
 			this.dragged_entity = null
@@ -388,7 +388,7 @@ export class Player extends Entity {
 			this.direction = originalPlayerDirection
 		}
 
-		super.update(currentTime)
+		super.update(current_time)
 	}
 
 	handleDragInput() {
