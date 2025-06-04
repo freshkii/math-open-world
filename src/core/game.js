@@ -195,11 +195,11 @@ export class Game {
 
 		this.options_menu = await OptionsMenu.create(this)
 		
-		this.current_map = "map 2" // "scene"
+		this.current_map = "house" // "scene"
 		this.map = this.maps[this.current_map]
 
 		// test entities
-		new Spider(this, this.maps["new_map"], constants.TILE_SIZE * 45, constants.TILE_SIZE * 45)
+		new Spider(this, this.maps["new_map"], constants.TILE_SIZE * 104, constants.TILE_SIZE * 73, 100)
 		new Frog(this, this.maps["new_map"], constants.TILE_SIZE * 117, constants.TILE_SIZE * 86)
 
 		const inventory = await Inventory.create(this, "inventory.png")
@@ -243,7 +243,7 @@ export class Game {
 		
 		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
 			// Totally temporary
-			this.effects.BIG_HITBOX.apply(time, this.player, 100)
+			// this.effects.BIG_HITBOX.apply(time, this.player, 100)
 		//this.effects.BIG_HITBOX.apply(time, this.player, 100) it's very annoying so i'll turn that off for a bit
 	})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
 		const test_item_stack = new ItemStack(test_item, 1)
