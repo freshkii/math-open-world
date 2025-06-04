@@ -6,6 +6,7 @@ import { Map } from '../world/map.js'
 import { clamp, Resizeable } from '../utils.js'
 import { ProjectileAttack, SwingingAttack } from './attack.js'
 import { Inventory } from '../ui/inventory.js'
+import { Talkable } from './talkable.js'
 
 export class Player extends Entity {
 	/**
@@ -405,6 +406,22 @@ export class Player extends Entity {
 				this.fullSpeed.set_value(constants.TILE_SIZE / 48)
 				return true
 			}
+		}
+	}
+
+	render(){
+		super.render()
+		if(
+			this.raycast_hitbox.get_colliding_hitboxes()
+			.filter(hitbox => hitbox.owner instanceof Talkable).length > 0
+		){
+			this.game.tilesets["keys_tileset"].drawTile(
+				4,
+				this.worldX.get() - this.game.camera.x.get()
+					- this.game.tilesets["keys_tileset"].screen_tile_size.get() / 2,
+				this.worldY.get() - constants.TILE_SIZE * 0.75 - this.game.camera.y.get()
+					- this.game.tilesets["keys_tileset"].screen_tile_size.get() / 2
+			)
 		}
 	}
 }

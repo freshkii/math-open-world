@@ -970,16 +970,6 @@ export class Game {
 
 		this.get_current_map().render()
 
-		if(
-			this.player.raycast_hitbox.get_colliding_hitboxes()
-			.filter(hitbox => hitbox.owner instanceof Talkable).length > 0
-		){
-			this.tilesets["keys_tileset"].drawTile(
-				4, this.canvas.width / 2,
-				this.canvas.height / 2 + constants.TILE_SIZE
-			)
-		}
-
 		if(this.options_menu.debug) {
 			this.hitboxes.forEach(hitbox => {hitbox.render()})
 			this.talkables.forEach(talkable => {talkable.render()})
