@@ -59,10 +59,13 @@ export const constants = {
 	WALK_STATE: 1,
 	ATTACK_STATE: 2,
 	DRAG_STATE: 3,
+    RUSHING_STATE: 4,
 
 	WANDERING_AI_STATE: 0,
 	STILL_AI_STATE: 1,
 	CHASING_AI_STATE: 2,
+    RUSH_AI_STATE: 3,
+    Longrangeattacking_AI_STATE: 4,
     HEALTH_COLORS:['red', 'orange', 'green']
 }
 

@@ -194,12 +194,12 @@ export class Game {
 
 		this.options_menu = await OptionsMenu.create(this)
 		
-		this.current_map = "map 2" // "scene"
+		this.current_map = "house" // "scene"
 		this.map = this.maps[this.current_map]
 
 		// test entities
-		new Spider(this, this.maps["map"], constants.TILE_SIZE * 2, constants.TILE_SIZE * 2)
-		new Frog(this, this.maps["map"], constants.TILE_SIZE * 12, constants.TILE_SIZE * 12, 0.5)
+		new Spider(this, this.maps["new_map"], constants.TILE_SIZE * 104, constants.TILE_SIZE * 73, 100)
+		new Frog(this, this.maps["new_map"], constants.TILE_SIZE * 117, constants.TILE_SIZE * 86)
 
 		const inventory = await Inventory.create(this, "inventory.png")
 		this.inventory_unlocked = false
@@ -242,7 +242,7 @@ export class Game {
 		
 		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
 			// Totally temporary
-			this.effects.BIG_HITBOX.apply(time, this.player, 100)
+			// this.effects.BIG_HITBOX.apply(time, this.player, 100)
 		//this.effects.BIG_HITBOX.apply(time, this.player, 100) it's very annoying so i'll turn that off for a bit
 	})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
 		const test_item_stack = new ItemStack(test_item, 1)
@@ -899,13 +899,13 @@ export class Game {
 	 * @returns 
 	 */
 	update(current_time) {
-		this.planned.filter(command => command.activation_time==null).forEach(command => command.activation_time = current_time + command.delay)
 		this.planned.forEach(command => {
-			if(command.activation_time <= current_time){
+			if(command.delay == 0){
 				command.command()
 				this.planned.splice(this.planned.indexOf(command), 1)
 			}
 		})
+		this.planned.forEach(command => command.delay--)
 		this.collision_hitboxes = this.collision_hitboxes.filter(h => h.active)
 		this.combat_hitboxes = this.combat_hitboxes.filter(h => h.active)
 		this.hitboxes = this.hitboxes.filter(h => h.active)
@@ -971,6 +971,8 @@ export class Game {
 			this.hitboxes.forEach(hitbox => {hitbox.render()})
 			this.talkables.forEach(talkable => {talkable.render()})
 			this.get_current_map().renderGrid()
+			this.ctx.fillStyle = "black"
+			this.ctx.fillText(`x: ${Math.round(this.player.worldX.get())} y: ${Math.round(this.player.worldY.get())}`, 50, 50)
 		}
 
 		if(this.current_ui){
@@ -1006,12 +1008,12 @@ export class Game {
 	}
 
 	/**
-	 * Allows to plan out command to be executed after a certain amount of time,
-	 * ⚠ make sure that the values that you use in the command still exist after that amount of time
+	 * Allows to plan out command to be executed after a certain amount of updates,
+	 * ⚠ make sure that the values that you use in the command still exist after that amount of update
 	 * @param {() => void} command 
 	 * @param {number} delay 
 	 */
 	plan(command, delay){
-		this.planned.push({command: command, delay: delay, activation_time: null})
+		this.planned.push({command: command, delay: delay})
 	}
 }
