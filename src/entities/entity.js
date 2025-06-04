@@ -131,14 +131,6 @@ export class Entity {
 			hitbox.command(hitbox, this.combat_hitbox, current_time)
 		})
 
-        if(this.dx.get() == 0 && this.dy.get() == 0){
-            if(this.state == constants.WALK_STATE)
-                this.state = constants.IDLE_STATE
-        } else {
-            if (this.state == constants.IDLE_STATE)
-                this.state = constants.WALK_STATE
-        }
-
         this.handleAnimation(current_time)
     }
 
