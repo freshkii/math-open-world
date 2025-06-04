@@ -24,6 +24,8 @@ import { Tileset } from '../world/tileset.js'
 
 export class Game {
 	constructor() {
+		this.last_update = -1/constants.GAME_TPS
+
 		// setup canvas & context
 		/** @type {HTMLCanvasElement} */
 		this.canvas = document.getElementById('game')
@@ -996,8 +998,13 @@ export class Game {
 	 * @param {Number} current_time 
 	 */
 	loop(current_time) {
-		this.update(current_time)
+		if(current_time - this.last_update >= 1/constants.GAME_TPS){
+			this.update(current_time)
+			console.log("update")
+			this.last_update = current_time
+		}
 		this.render()
+		console.log("render")
 		requestAnimationFrame(this.loop.bind(this))
 	}
 
