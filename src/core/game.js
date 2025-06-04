@@ -1,25 +1,25 @@
-import { Map } from '../world/map.js'
-import { Tileset } from '../world/tileset.js'
-import { Player } from '../entities/player.js'
+import { constants } from "../constants.js"
+import { AudioManager } from './audioManager.js'
 import { InputHandler } from './inputHandler.js'
+import { Player } from '../entities/player.js'
 import { Entity } from '../entities/entity.js'
 import { Hitbox } from '../entities/hitbox.js'
-import { Problem, TimedProblem } from '../ui/problem.js'
 import { Attack } from '../entities/attack.js'
-import { Ui } from '../ui/ui.js'
-import { Button, NumberArea, Icon, Label, TextArea, Texture } from '../ui/widgets.js'
 import { Talkable } from '../entities/talkable.js'
-import { constants } from "../constants.js"
-import { Transition, UnicoloreTransition } from '../ui/transition.js'
-import { Dialogue, QuestionDialogue } from '../ui/dialogue.js'
-import { Resizeable, YResizeable } from '../utils.js'
 import { Effect } from '../entities/effect.js'
 import { Frog } from '../entities/mobs/frog.js'
 import { Spider } from '../entities/mobs/spider.js'
+import { Problem, TimedProblem } from '../ui/problem.js'
+import { Ui } from '../ui/ui.js'
+import { Button, NumberArea, Icon, Label, TextArea, Texture } from '../ui/widgets.js'
+import { Transition, UnicoloreTransition } from '../ui/transition.js'
+import { Dialogue, QuestionDialogue } from '../ui/dialogue.js'
+import { Resizeable, YResizeable } from '../utils.js'
 import { OptionsMenu } from '../ui/options.js'
-import { AudioManager } from './audioManager.js'
 import { Inventory } from '../ui/inventory.js'
 import { Consumable, Item, ItemStack, Passive} from '../ui/items.js'
+import { Map } from '../world/map.js'
+import { Tileset } from '../world/tileset.js'
 
 
 export class Game {
@@ -152,7 +152,7 @@ export class Game {
 		}
 
 		/**@type {Array<{command: () => void, delay: Number, activation_time: Number}>} */
-		this.planned = []
+		this.scheduled = []
 	}
 
 	async run() {
@@ -1008,12 +1008,12 @@ export class Game {
 	}
 
 	/**
-	 * Allows to plan out command to be executed after a certain amount of updates,
+	 * Allows to schedule command to be executed after a certain amount of updates,
 	 * ⚠ make sure that the values that you use in the command still exist after that amount of update
 	 * @param {() => void} command 
 	 * @param {number} delay 
 	 */
-	plan(command, delay){
-		this.planned.push({command: command, delay: delay})
+	schedule(command, delay){
+		this.scheduled.push({command: command, delay: delay})
 	}
 }
