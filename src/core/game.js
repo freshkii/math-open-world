@@ -180,6 +180,7 @@ export class Game {
 		await Tileset.create(this, "checkbox_tileset.png", 32, constants.TILE_SIZE / 2, 0)
 		await Tileset.create(this, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
 		await Tileset.create(this, "inventory_tooltip_tileset.png", 16, constants.TILE_SIZE / 4, 0)
+		await Tileset.create(this, "keys_tileset.png", 20, constants.TILE_SIZE / 4, 0)
 
 		await Tileset.create(this, "digital_locks.png", 20, constants.TILE_SIZE, 0)
 		await Tileset.create(this, "Game Boy Advance - The Legend of Zelda The Minish Cap - Lon Lon Ranch.png", 16, constants.TILE_SIZE, 0)
@@ -966,7 +967,17 @@ export class Game {
 		*/
 
 		this.get_current_map().render()
-		
+
+		if(
+			this.player.raycast_hitbox.get_colliding_hitboxes()
+			.filter(hitbox => hitbox.owner instanceof Talkable).length > 0
+		){
+			this.tilesets["keys_tileset"].drawTile(
+				4, this.canvas.width / 2,
+				this.canvas.height / 2 + constants.TILE_SIZE
+			)
+		}
+
 		if(this.options_menu.debug) {
 			this.hitboxes.forEach(hitbox => {hitbox.render()})
 			this.talkables.forEach(talkable => {talkable.render()})
