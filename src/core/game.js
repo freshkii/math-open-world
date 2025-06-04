@@ -899,13 +899,13 @@ export class Game {
 	 * @returns 
 	 */
 	update(current_time) {
-		this.planned.forEach(command => {
+		this.scheduled.forEach(command => {
 			if(command.delay == 0){
 				command.command()
-				this.planned.splice(this.planned.indexOf(command), 1)
+				this.scheduled.splice(this.scheduled.indexOf(command), 1)
 			}
 		})
-		this.planned.forEach(command => command.delay--)
+		this.scheduled.forEach(command => command.delay--)
 		this.collision_hitboxes = this.collision_hitboxes.filter(h => h.active)
 		this.combat_hitboxes = this.combat_hitboxes.filter(h => h.active)
 		this.hitboxes = this.hitboxes.filter(h => h.active)
