@@ -988,7 +988,7 @@ export class Game {
 	 * @param {Number} current_time 
 	 */
 	loop(current_time) {
-		if(current_time - this.last_update >= 1/constants.GAME_TPS){
+		if(current_time - this.last_update >= 1000/constants.GAME_TPS){
 			this.update(current_time)
 			console.log("update")
 			this.last_update = current_time
