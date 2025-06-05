@@ -990,11 +990,9 @@ export class Game {
 	loop(current_time) {
 		if(current_time - this.last_update >= 1000/constants.GAME_TPS){
 			this.update(current_time)
-			console.log("update")
 			this.last_update = current_time
 		}
 		this.render()
-		console.log("render")
 		requestAnimationFrame(this.loop.bind(this))
 	}
 
