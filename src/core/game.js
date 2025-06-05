@@ -24,7 +24,7 @@ import { Tileset } from '../world/tileset.js'
 
 export class Game {
 	constructor() {
-		this.last_update = -1/constants.GAME_TPS
+		this.last_update = -1000/constants.GAME_TPS
 
 		// setup canvas & context
 		/** @type {HTMLCanvasElement} */
@@ -245,9 +245,8 @@ export class Game {
 		
 		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
 			// Totally temporary
-			// this.effects.BIG_HITBOX.apply(time, this.player, 100)
-		//this.effects.BIG_HITBOX.apply(time, this.player, 100) it's very annoying so i'll turn that off for a bit
-	})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
+			// this.effects.BIG_HITBOX.apply(time, this.player, 100) it's very annoying so i'll turn that off for a bit
+		})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
 		const test_item_stack = new ItemStack(test_item, 1)
 		inventory.add_items(test_item_stack)
 
@@ -610,7 +609,7 @@ export class Game {
 			await Dialogue.create(this, "dialogue_box.png", "32", (d) => {}, constants.TILE_SIZE / 3),
 			await Dialogue.create(this, "dialogue_box.png", "33", (d) => {}, constants.TILE_SIZE / 3),
 			await Dialogue.create(this, "dialogue_box.png", "34", (d) => {}, constants.TILE_SIZE / 3),
-			await Dialogue.create(this, "dialogue_box.png", "35", (d) => {}, constants.TILE_SIZE / 3),
+			await Dialogue.create(this, "dialogue_box.png", "35", (d) => {}, constants.TILE_SIZE / 3)
 		]
 
 		new Talkable(this, this.maps["new_map"], new Hitbox(this, this.maps["new_map"], 100 * constants.TILE_SIZE, 74 * constants.TILE_SIZE, constants.TILE_SIZE * 2, constants.TILE_SIZE * 2), bridge_dialogues[0])
@@ -690,17 +689,19 @@ export class Game {
 		let digital_locks_widgets = []
 		for (let i = 0; i < 4; i++) {
 			digital_locks_widgets.push(
-				new Button(this, `button-${i}`, (i-2) * constants.TILE_SIZE * 1.2, 0.5 * constants.TILE_SIZE, constants.TILE_SIZE, constants.TILE_SIZE, true, (button, time) => {
-					if (button.value === undefined)
-						button.value = 0
-					else
-						button.value = (button.value + 1) % 4
-					// reset
-					for (let j = 1; j < 5; j++) {
-						button.ui.get_widget(`icon-${i}-${j}`).rendered = false
+				new Button(this, `button-${i}`, (i-2) * constants.TILE_SIZE * 1.2, 0.5 * constants.TILE_SIZE, constants.TILE_SIZE, constants.TILE_SIZE, true,
+					(button, time) => {
+						if (button.value === undefined)
+							button.value = 0
+						else
+							button.value = (button.value + 1) % 4
+						// reset
+						for (let j = 1; j < 5; j++) {
+							button.ui.get_widget(`icon-${i}-${j}`).rendered = false
+						}
+						button.ui.get_widget(`icon-${i}-${button.value+1}`).rendered = true
 					}
-					button.ui.get_widget(`icon-${i}-${button.value+1}`).rendered = true
-				})
+				)
 			)
 			for (let j = 1; j < 5; j++)
 				digital_locks_widgets.push(
@@ -919,11 +920,12 @@ export class Game {
 				this.current_ui.is_finished = false
 				this.current_ui = null
 			} else {
-				if((this.current_ui instanceof Transition
-					|| this.current_ui instanceof TimedProblem)
-					&& !this.current_ui.start_time)
-
-					this.current_ui.start_time = current_time
+				if(
+					(
+						this.current_ui instanceof Transition
+						|| this.current_ui instanceof TimedProblem
+					) && !this.current_ui.start_time
+				) this.current_ui.start_time = current_time
 				this.current_ui.update(current_time)
 				return
 			}
@@ -975,6 +977,7 @@ export class Game {
 			this.talkables.forEach(talkable => {talkable.render()})
 			this.get_current_map().renderGrid()
 			this.ctx.fillStyle = "black"
+			this.ctx.font = (Math.round(constants.TILE_SIZE / 2)).toString() +"px"
 			this.ctx.fillText(`x: ${Math.round(this.player.worldX.get())} y: ${Math.round(this.player.worldY.get())}`, 50, 50)
 		}
 
