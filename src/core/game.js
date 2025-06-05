@@ -1,29 +1,31 @@
-import { Map } from '../world/map.js'
-import { Tileset } from '../world/tileset.js'
-import { Player } from '../entities/player.js'
+import { constants } from "../constants.js"
+import { AudioManager } from './audioManager.js'
 import { InputHandler } from './inputHandler.js'
+import { Player } from '../entities/player.js'
 import { Entity } from '../entities/entity.js'
 import { Hitbox } from '../entities/hitbox.js'
-import { Problem, TimedProblem } from '../ui/problem.js'
 import { Attack } from '../entities/attack.js'
-import { Ui } from '../ui/ui.js'
-import { Button, NumberArea, Icon, Label, TextArea, Texture } from '../ui/widgets.js'
 import { Talkable } from '../entities/talkable.js'
-import { constants } from "../constants.js"
-import { Transition, UnicoloreTransition } from '../ui/transition.js'
-import { Dialogue, QuestionDialogue } from '../ui/dialogue.js'
-import { Resizeable, YResizeable } from '../utils.js'
 import { Effect } from '../entities/effect.js'
 import { Frog } from '../entities/mobs/frog.js'
 import { Spider } from '../entities/mobs/spider.js'
+import { Problem, TimedProblem } from '../ui/problem.js'
+import { Ui } from '../ui/ui.js'
+import { Button, NumberArea, Icon, Label, TextArea, Texture } from '../ui/widgets.js'
+import { Transition, UnicoloreTransition } from '../ui/transition.js'
+import { Dialogue, QuestionDialogue } from '../ui/dialogue.js'
+import { Resizeable, YResizeable } from '../utils.js'
 import { OptionsMenu } from '../ui/options.js'
-import { AudioManager } from './audioManager.js'
 import { Inventory } from '../ui/inventory.js'
 import { Consumable, Item, ItemStack, Passive} from '../ui/items.js'
+import { Map } from '../world/map.js'
+import { Tileset } from '../world/tileset.js'
 
 
 export class Game {
 	constructor() {
+		this.last_update = -1000/constants.GAME_TPS
+
 		// setup canvas & context
 		/** @type {HTMLCanvasElement} */
 		this.canvas = document.getElementById('game')
@@ -152,7 +154,7 @@ export class Game {
 		}
 
 		/**@type {Array<{command: () => void, delay: Number, activation_time: Number}>} */
-		this.planned = []
+		this.scheduled = []
 	}
 
 	async run() {
@@ -180,6 +182,7 @@ export class Game {
 		await Tileset.create(this, "checkbox_tileset.png", 32, constants.TILE_SIZE / 2, 0)
 		await Tileset.create(this, "arrow.png", 15, constants.TILE_SIZE / 8, 0)
 		await Tileset.create(this, "inventory_tooltip_tileset.png", 16, constants.TILE_SIZE / 4, 0)
+		await Tileset.create(this, "keys_tileset.png", 20, constants.TILE_SIZE / 4, 0)
 
 		await Tileset.create(this, "digital_locks.png", 20, constants.TILE_SIZE, 0)
 		await Tileset.create(this, "Game Boy Advance - The Legend of Zelda The Minish Cap - Lon Lon Ranch.png", 16, constants.TILE_SIZE, 0)
@@ -242,9 +245,8 @@ export class Game {
 		
 		const test_item = (await Passive.create(this, "Item_51.png", "Ring", (p, time) => {
 			// Totally temporary
-			// this.effects.BIG_HITBOX.apply(time, this.player, 100)
-		//this.effects.BIG_HITBOX.apply(time, this.player, 100) it's very annoying so i'll turn that off for a bit
-	})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
+			// this.effects.BIG_HITBOX.apply(time, this.player, 100) it's very annoying so i'll turn that off for a bit
+		})).set_tooltip("This ring make a barrier arround you that allows you to touch or be touched from further away")
 		const test_item_stack = new ItemStack(test_item, 1)
 		inventory.add_items(test_item_stack)
 
@@ -607,7 +609,7 @@ export class Game {
 			await Dialogue.create(this, "dialogue_box.png", "32", (d) => {}, constants.TILE_SIZE / 3),
 			await Dialogue.create(this, "dialogue_box.png", "33", (d) => {}, constants.TILE_SIZE / 3),
 			await Dialogue.create(this, "dialogue_box.png", "34", (d) => {}, constants.TILE_SIZE / 3),
-			await Dialogue.create(this, "dialogue_box.png", "35", (d) => {}, constants.TILE_SIZE / 3),
+			await Dialogue.create(this, "dialogue_box.png", "35", (d) => {}, constants.TILE_SIZE / 3)
 		]
 
 		new Talkable(this, this.maps["new_map"], new Hitbox(this, this.maps["new_map"], 100 * constants.TILE_SIZE, 74 * constants.TILE_SIZE, constants.TILE_SIZE * 2, constants.TILE_SIZE * 2), bridge_dialogues[0])
@@ -687,17 +689,19 @@ export class Game {
 		let digital_locks_widgets = []
 		for (let i = 0; i < 4; i++) {
 			digital_locks_widgets.push(
-				new Button(this, `button-${i}`, (i-2) * constants.TILE_SIZE * 1.2, 0.5 * constants.TILE_SIZE, constants.TILE_SIZE, constants.TILE_SIZE, true, (button, time) => {
-					if (button.value === undefined)
-						button.value = 0
-					else
-						button.value = (button.value + 1) % 4
-					// reset
-					for (let j = 1; j < 5; j++) {
-						button.ui.get_widget(`icon-${i}-${j}`).rendered = false
+				new Button(this, `button-${i}`, (i-2) * constants.TILE_SIZE * 1.2, 0.5 * constants.TILE_SIZE, constants.TILE_SIZE, constants.TILE_SIZE, true,
+					(button, time) => {
+						if (button.value === undefined)
+							button.value = 0
+						else
+							button.value = (button.value + 1) % 4
+						// reset
+						for (let j = 1; j < 5; j++) {
+							button.ui.get_widget(`icon-${i}-${j}`).rendered = false
+						}
+						button.ui.get_widget(`icon-${i}-${button.value+1}`).rendered = true
 					}
-					button.ui.get_widget(`icon-${i}-${button.value+1}`).rendered = true
-				})
+				)
 			)
 			for (let j = 1; j < 5; j++)
 				digital_locks_widgets.push(
@@ -899,13 +903,13 @@ export class Game {
 	 * @returns 
 	 */
 	update(current_time) {
-		this.planned.forEach(command => {
+		this.scheduled.forEach(command => {
 			if(command.delay == 0){
 				command.command()
-				this.planned.splice(this.planned.indexOf(command), 1)
+				this.scheduled.splice(this.scheduled.indexOf(command), 1)
 			}
 		})
-		this.planned.forEach(command => command.delay--)
+		this.scheduled.forEach(command => command.delay--)
 		this.collision_hitboxes = this.collision_hitboxes.filter(h => h.active)
 		this.combat_hitboxes = this.combat_hitboxes.filter(h => h.active)
 		this.hitboxes = this.hitboxes.filter(h => h.active)
@@ -916,11 +920,12 @@ export class Game {
 				this.current_ui.is_finished = false
 				this.current_ui = null
 			} else {
-				if((this.current_ui instanceof Transition
-					|| this.current_ui instanceof TimedProblem)
-					&& !this.current_ui.start_time)
-
-					this.current_ui.start_time = current_time
+				if(
+					(
+						this.current_ui instanceof Transition
+						|| this.current_ui instanceof TimedProblem
+					) && !this.current_ui.start_time
+				) this.current_ui.start_time = current_time
 				this.current_ui.update(current_time)
 				return
 			}
@@ -966,12 +971,13 @@ export class Game {
 		*/
 
 		this.get_current_map().render()
-		
+
 		if(this.options_menu.debug) {
 			this.hitboxes.forEach(hitbox => {hitbox.render()})
 			this.talkables.forEach(talkable => {talkable.render()})
 			this.get_current_map().renderGrid()
 			this.ctx.fillStyle = "black"
+			this.ctx.font = (Math.round(constants.TILE_SIZE / 2)).toString() +"px"
 			this.ctx.fillText(`x: ${Math.round(this.player.worldX.get())} y: ${Math.round(this.player.worldY.get())}`, 50, 50)
 		}
 
@@ -985,7 +991,10 @@ export class Game {
 	 * @param {Number} current_time 
 	 */
 	loop(current_time) {
-		this.update(current_time)
+		if(current_time - this.last_update >= 1000/constants.GAME_TPS){
+			this.update(current_time)
+			this.last_update = current_time
+		}
 		this.render()
 		requestAnimationFrame(this.loop.bind(this))
 	}
@@ -1008,12 +1017,12 @@ export class Game {
 	}
 
 	/**
-	 * Allows to plan out command to be executed after a certain amount of updates,
+	 * Allows to schedule command to be executed after a certain amount of updates,
 	 * ⚠ make sure that the values that you use in the command still exist after that amount of update
 	 * @param {() => void} command 
 	 * @param {number} delay 
 	 */
-	plan(command, delay){
-		this.planned.push({command: command, delay: delay})
+	schedule(command, delay){
+		this.scheduled.push({command: command, delay: delay})
 	}
 }
