@@ -411,12 +411,27 @@ export class Player extends Entity {
 
 	render(){
 		super.render()
+		let in_range = this.raycast_hitbox.get_colliding_hitboxes()
 		if(
-			this.raycast_hitbox.get_colliding_hitboxes()
-			.filter(hitbox => hitbox.owner instanceof Talkable).length > 0
+			in_range.filter(
+				hitbox => hitbox.owner instanceof Talkable
+			).length > 0
 		){
 			this.game.tilesets["keys_tileset"].drawTile(
 				4,
+				this.worldX.get() - this.game.camera.x.get()
+					- this.game.tilesets["keys_tileset"].screen_tile_size.get() / 2,
+				this.worldY.get() - constants.TILE_SIZE * 0.75 - this.game.camera.y.get()
+					- this.game.tilesets["keys_tileset"].screen_tile_size.get() / 2
+			)
+		}
+		if(
+			in_range.filter(
+				hitbox => hitbox.owner?.draggable && !hitbox.owner.dragged
+			).length > 0
+		){
+			this.game.tilesets["keys_tileset"].drawTile(
+				8,
 				this.worldX.get() - this.game.camera.x.get()
 					- this.game.tilesets["keys_tileset"].screen_tile_size.get() / 2,
 				this.worldY.get() - constants.TILE_SIZE * 0.75 - this.game.camera.y.get()
