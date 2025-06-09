@@ -61,7 +61,7 @@ export class InputHandler {
      */
     isKeyPressed(key) {
         if (this.keys_pressed[key]) {
-            this.game.plan(() => this.keys_pressed[key] = false, 0)
+            this.game.schedule(() => this.keys_pressed[key] = false, 0)
             return true
         } else {
             return false
@@ -84,7 +84,7 @@ export class InputHandler {
 	 */
 	isMousePressed(button) {
 		if (this.mouse_buttons_pressed[button]) {
-            this.game.plan(() => this.mouse_buttons_pressed[button] = false, 0)
+            this.game.schedule(() => this.mouse_buttons_pressed[button] = false, 0)
 			return true
 		}
 		return false
@@ -98,7 +98,7 @@ export class InputHandler {
         for(let [key, value] of Object.entries(this.keys_down)){
             if(value){
                 if(this.mass_check_pressed_keys[key]){
-                    this.game.plan(() => this.mass_check_pressed_keys[key] = false, 0)
+                    this.game.schedule(() => this.mass_check_pressed_keys[key] = false, 0)
                     return key
                 }
             }
