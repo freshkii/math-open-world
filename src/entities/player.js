@@ -15,6 +15,7 @@ export class Player extends Entity {
 	 * @param {Inventory} inventory - the player's inventory
 	 */
 	constructor(game, player_tileset, inventory) {
+		const current_map = game.get_current_map()
 		super(
 			game, game.get_current_map(), player_tileset,
 			new Hitbox(game, game.get_current_map(), 400, 400 + constants.TILE_SIZE / 2, 2 * constants.TILE_SIZE / 3, constants.TILE_SIZE / 2, true, true),
@@ -39,6 +40,8 @@ export class Player extends Entity {
 
 		this.raycast_hitbox = new Hitbox(game, game.get_current_map(), 400, 400, 0, 100, false, true, this)
 		this.inventory = inventory
+
+		this.set_map(current_map)
 	}
 
 	reset_dash_cooldown() {
@@ -163,11 +166,6 @@ export class Player extends Entity {
 				break
 		}
 
-		if (this.game.inputHandler.isKeyPressed("e") && this.game.inventory_unlocked) {
-            if (!this.game.current_ui) {
-                this.game.current_ui = this.inventory;
-            }
-        }
 
 		this.inventory.update_passive_effects(current_time)
 
@@ -398,7 +396,6 @@ export class Player extends Entity {
 
 		for (const hb of this.raycast_hitbox.get_colliding_hitboxes(true, true)) {
 			console.log(hb)
-			console.log(hb.owner instanceof Entity)
 			if (hb.owner instanceof Entity && hb.owner.draggable) {
 				this.dragged_entity = hb.owner
 				this.state = constants.DRAG_STATE

@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-	<meta charset='UTF-8'>
-	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
-	<link rel='icon' type='image/x-icon' href='assets/images/favicon.ico'>
-	<link rel="stylesheet" href="style.css">
-	<title>MOW</title>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <link rel='icon' type='image/x-icon' href='assets/images/favicon.ico'>
+  <link rel='stylesheet' href='style.css'>
+  <title>MOW</title>
 </head>
 <body>
-	<canvas id='game'></canvas>
-	<script type='module' src='script.js' defer></script>
+  <header>
+    <h1>Math Open World</h1>
+    <nav>
+      <button onclick="window.location.href='game.html'">Play</button>
+    </nav>
+  </header>
+
+  <section class="hero-banner">
+    <h2>Welcome to Math Open World</h2>
+    <button onclick="window.location.href='game.html'">Start Playing</button>
+  </section>
+
+  <footer>The whole site and GitHub repo is under the MIT license</footer>
+  <canvas id='game' style="display: none;"></canvas>
 </body>
 </html>

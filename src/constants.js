@@ -28,8 +28,7 @@ export const constants = {
     WIDGET_PRIORITIES: {
         "window": 3,
         "button": 2,
-        "textarea": 2,
-        "numberarea": 2,
+        "textarea": 2, "numberarea": 2,
         "label": 1,
         "texture": 0,
         "icon": 0
@@ -70,94 +69,88 @@ export const constants = {
     HEALTH_COLORS:['red', 'orange', 'green']
 }
 
+const mn = 0.4811320754716981
 
-// The future has arrived
-// the format is
-// map_name: tile_number: {x: new_x, y: new_y, width: new_width, height: new_height}
-//
-// with:
-// map_name the path to the map file, String
-// tile_number the number of the tile that needs to be changed in the maps' tileset, Number
-//
-// new_x, new_y the new ccordinates of the top-left corner of the hitbox, 0 by default, Numbers
-// new_width, new_height the new width and height of the hitbox, constants.TILE_SIZE by default, Numbers
-//
-// x, y, width and height takes their default values when not specified
-export const collisions = {
-    "map.json": {
-        76: { width: 96, height: 112},
-        113: {x: 22, y: 75, width: 85, height: 25},
-        114: {x: 32, width: 64, height: 112},
-        127: {x: 56, width: 72},
-        131: {width: 72},
-        167: {x: 56, width: 72, height: 110},
-        168: {height: 110},
-        170: {height: 110},
-        171: {width: 72, height: 110},
-    },
-    "house.json": {
-        11: {y: -8, height: 96},
-        55: {y: -8, height: 96}
-    },
-	"new_map.json": {
-		169: {width: 0, height: 0},
-		76: { x: 20, y: 90, width: 76, height: 22},
-        113: {x: 22, y: 75, width: 85, height: 25},
-        114: {x: 32, width: 64, height: 112},
-        127: {x: 56, width: 72},
-        131: {width: 72},
-        167: {x: 56, width: 72, height: 110},
-        168: {height: 110},
-        170: {height: 110},
-        171: {width: 72, height: 110},
-		721: {x: 50,width:30,height:110},
-		724: {y:32, height:80, x:40, width: 48},
-		725: {x:50, width:30},
-		683: {x:40, y: 56, height:56, width:48},
-		684: {x:40,y:56, width:48},
-		685: {y:56, height:32},
-		723: {x:40, y:32, height:80, width:48}
+export const tilesets = [
+	{ src:'map.png',																	img_tile_size: 16,		screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src:'cabane_tileset.png', 														img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src:'frog.png',																	img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE / 2	},
+	{ src:'spider_tileset.png', 														img_tile_size: 100, 	screen_tile_size: (game, constants) => constants.TILE_SIZE * 4	},
+	{ src:'book_ui_focus.png',															img_tile_size: 4,  		screen_tile_size: (game, constants) => game.canvas.width / 16	},
+	{ src:'next_page_arrow_tileset.png',												img_tile_size: 24,  	screen_tile_size: (game, constants) => game.canvas.width / 20	},
+	{ src:'Kanji.png',																	img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src:'Axe.png',																	img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src:'selection_cursor.png', 														img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE / 2	},
+	{ src:'checkbox_tileset.png', 														img_tile_size: 32,  	screen_tile_size: (game, constants) => constants.TILE_SIZE / 2	},
+	{ src:'arrow.png',																	img_tile_size: 15,  	screen_tile_size: (game, constants) => constants.TILE_SIZE / 8	},
+	{ src:'inventory_tooltip_tileset.png',												img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE / 4	},
+	{ src:'keys_tileset.png', 															img_tile_size: 20,  	screen_tile_size: (game, constants) => constants.TILE_SIZE / 4	},
+	{ src:'digital_locks.png',															img_tile_size: 20,  	screen_tile_size: (game, constants) => constants.TILE_SIZE * mn	},
+	{ src:'Game Boy Advance - The Legend of Zelda The Minish Cap - Lon Lon Ranch.png',	img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src:'Game Boy Advance - The Legend of Zelda The Minish Cap - Hyrule Town.png', 	img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src:'Game Boy Advance - The Legend of Zelda The Minish Cap - Royal Crypt.png',	img_tile_size: 16,		screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src:'LegendOfZelda-MinishCap-DarkHyruleCastle.png', 								img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src:'firefly.png', 																img_tile_size: 16,  	screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src: 'e1.png',																	img_tile_size: 16,		screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src: 'e2.png',																	img_tile_size: 16,		screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src: 'statues.png',																img_tile_size: 16,		screen_tile_size: (game, constants) => constants.TILE_SIZE		},
+	{ src: 'bear.png',																	img_tile_size: 64,		screen_tile_size: (game, constants) => constants.TILE_SIZE * 4	},
+]
+
+export const maps = [
+	{
+		src: 'map.json',  bg_color: 'grey', spawn_cords: {x: 184.5, y: 94},
+		collisions: {
+			1394: {height: 80},
+			1395: {height: 80},
+			1399: {height: 80},
+			1400: {height: 80},
+			1446: {height: 72},
+			1448: {height: 72},
+			3076: {x: 24, y: 80, width: 80, height: 24},
+			3910: {void: true},
+			3950: {width: 48},
+			4070: {width: 48},
+			4030: {width: 48}
+    	}, block_depth_order: [3076]
 	},
-	"map_multi_ts.json": {},
-	"map 2.json": {}
-}
+	{
+		src: 'house.json',  bg_color: 'black', spawn_cords: {x: 1.5, y: 3},
+		collisions: {
+			11: {y: -8, height: 96},
+			55: {y: -8, height: 96}
+		},
+		block_depth_order: [11, 55]
+	},
+	{
+		src: 'castle.json',  bg_color: '#C8F0D0', spawn_cords: {x: 12, y: 70},
+		collisions: {
+			45042: {void:true},
+			45043: {void:true},
+			45044: {void:true},
+			45267: {void:true},
+			45268: {void:true},
+			45269: {void:true},
+		},
+		block_depth_order: []
+	}
+]
 
-
-export const blockDepthOrder = {
-    "map.json": [
-        127,
-        131,
-        113,
-        171,
-        168,
-        170,
-        167,
-        76,
-        114
-    ],
-    "house.json": [
-        11,
-        55
-    ],
-	"new_map.json": [
-		169,
-		131,
-        127,
-        725,
-        684,
-        683,
-        724,
-        685,
-        113,
-		723,
-        721,
-        168,
-        170,
-        167,
-        171,
-        114,
-        76  
+export const audios = {
+	'menu': [
+		{src: 'click.mp3', key: 'click'}
 	],
-	"map_multi_ts.json": [],
-	"map 2.json": []
+	'game': [
+		{src: 'slash.mp3', key: 'slash'}
+	],
+	'castle': [
+		{src: 'wind.mp3', key: 'wind'},
+		{src: 'bell.mp3', key: 'bell'},
+		{src: 'lightning.mp3', key: 'lightning'},
+		{src: 'heart beating.mp3', key: 'heart beating'}
+	],
+	'background': [
+		{src: 'music1.mp3', key: 'music', loop: true},
+		{src: 'step.mp3', key: 'step', loop: true}
+	]
 }

@@ -1,5 +1,5 @@
 import { Game } from "../core/game.js"
-import { config, constants } from "../constants.js"
+import { config, constants, tilesets } from "../constants.js"
 import { Resizeable } from "../utils.js"
 import { Entity } from "../entities/entity.js"
 
@@ -44,6 +44,12 @@ export class Tileset {
         game.tilesets[src.split(".").slice(0, -1).join(".")] = tileset
         return tileset
     }
+
+	static async loadTilesets(game) {
+		for (let tileset of tilesets) {
+			await Tileset.create(game, tileset.src, tileset.img_tile_size, tileset.screen_tile_size(game, constants), tileset.spacing ?? 0)
+		}
+	}
 
     /**
      * Loads the tileset image.

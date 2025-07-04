@@ -1,4 +1,8 @@
+import { constants } from "./constants.js"
 import { Game } from "./core/game.js"
+import { Hitbox } from "./entities/hitbox.js"
+import { Map } from "./world/map.js"
+import { Transition } from "./ui/transition.js"
 
 /**
  * @param {Number} x 
@@ -52,8 +56,9 @@ export class Resizeable{
 	set_value(new_value){
 		if(!isNaN(new_value / this.game.canvas.width))
 			this.value = new_value / this.game.canvas.width
-		else
+		else {
 			throw new Error(`value ${new_value} nan`)
+		}
 	}
 
 	get() {
@@ -84,8 +89,10 @@ export class YResizeable{
 	set_value(new_value){
 		if(!isNaN(new_value / this.game.canvas.width))
 			this.value = new_value / this.game.canvas.height
-		else
+		else {
+			console.log(this.game)
 			throw new Error(`value ${new_value} nan`)
+		}
 	}
 
 	get(){
@@ -112,4 +119,88 @@ export const equality_test = (a, b) => {
 		}
 	}
 	return funct(a, b)
+}
+
+/**
+ * @param {Game} game
+ * @param {String} mapName1
+ * @param {String} mapName2
+ * @param {Object} rtMap1
+ * @param {Object} rtMap2
+ * @param {Object} tpMap1
+ * @param {Object} tpMap2
+ * @param {Number} dirMap1
+ * @param {Number} dirMap2
+ * @param {Transition} transition
+ * @param {Number} currentTime
+ */
+export const createSwitchHitboxes = (game, mapName1, mapName2, boxMap1, tpMap1, boxMap2, tpMap2, dirMap1, dirMap2, transition=null, addingCode1 = (() => {}), addingCode2 = (() => {})) => {
+	new Hitbox(game, game.maps[mapName1], boxMap1.x * constants.TILE_SIZE, boxMap1.y * constants.TILE_SIZE, boxMap1.width * constants.TILE_SIZE, boxMap1.height * constants.TILE_SIZE, false, false, null, (h, c_h, t) => {
+		if(!c_h.player) return
+		game.maps[mapName1].set_player_pos({x: tpMap1.x * constants.TILE_SIZE, y: tpMap1.y * constants.TILE_SIZE})
+		game.set_map(mapName2)
+		game.player.set_map(game.maps[mapName2])
+		game.player.direction = dirMap2 
+
+		// reset dash
+		if (game.player.dashing)
+			game.player.dash_reset = true
+		else
+			game.player.last_dash = -constants.PLAYER_DASH_COOLDOWN
+
+
+		// transition
+		if (transition)
+			transition.start(t)
+
+		addingCode1(game)
+	}) // h1
+	new Hitbox(game, game.maps[mapName2], boxMap2.x * constants.TILE_SIZE, boxMap2.y * constants.TILE_SIZE, boxMap2.width * constants.TILE_SIZE, boxMap2.height * constants.TILE_SIZE, false, false, null, (h, c_h, t) => {
+		if(!c_h.player) return
+		game.maps[mapName2].set_player_pos({x: tpMap2.x * constants.TILE_SIZE, y: tpMap2.y * constants.TILE_SIZE})
+		game.set_map(mapName1)
+		game.player.set_map(game.maps[mapName1])
+		game.player.direction = dirMap1
+
+		// reset dash
+		if (game.player.dashing)
+			game.player.dash_reset = true
+		else
+			game.player.last_dash = -constants.PLAYER_DASH_COOLDOWN
+
+		addingCode2(game)
+
+		// transition
+		if (transition)
+			transition.start(t)
+	}) // h2
+}
+
+export const createTpHitboxes = (game, mapName, box1, tp1, box2, tp2, dir1, dir2, transition = null) => {
+	new Hitbox(game,
+		game.maps[mapName],
+		box1.x * constants.TILE_SIZE, box1.y * constants.TILE_SIZE,
+		box1.width * constants.TILE_SIZE, box1.height * constants.TILE_SIZE,
+		false, false, null,
+		(h, c_h, t) => {
+			if (!c_h.player) return
+			c_h.owner.set_pos(tp2.x * constants.TILE_SIZE, tp2.y * constants.TILE_SIZE)
+			c_h.owner.direction = dir2
+			if (transition)
+				transition.start(t)
+		}
+	)
+	new Hitbox(game,
+		game.maps[mapName],
+		box2.x * constants.TILE_SIZE, box2.y * constants.TILE_SIZE,
+		box2.width * constants.TILE_SIZE, box2.height * constants.TILE_SIZE,
+		false, false, null,
+		(h, c_h, t) => {
+			if (!c_h.player) return
+			c_h.owner.set_pos(tp1.x * constants.TILE_SIZE, tp1.y * constants.TILE_SIZE)
+			c_h.owner.direction = dir1
+			if (transition)
+				transition.start(t)
+		}
+	)
 }

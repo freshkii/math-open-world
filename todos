@@ -1,7 +1,5 @@
-#TODO: enhance mob AI
-#TODO: implement the whole map
-#TODO: add problems
-
+#TODO: add keys (in the castle)
+#TODO: deal with the apothicaire
 #FIX: Stripped rendering effect (strange lines behaviour)
 
 # Maybe we could separate collision hitboxes and action hitboxes by making sub-classes

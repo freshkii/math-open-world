@@ -42,18 +42,17 @@ export class Talkable{
 		}
 	}
 
-    update(){
-        if(this.game.inputHandler.keys_down[constants.INTERACTION_KEY]){
-            if(this.game.player.raycast_hitbox.is_colliding(this.hitbox)){
-                if(this.is_talkable)
-                    this.on_interact()
-            }
+    update(current_time){
+        if(this.game.inputHandler.isKeyPressed(constants.INTERACTION_KEY) && this.game.player.raycast_hitbox.is_colliding(this.hitbox)) {
+			this.on_interact()
+			this.game.inputHandler.keys_pressed[constants.INTERACTION_KEY] = false
         }
         if(this.entity)
             this.hitbox.center_around(this.entity.worldX.get(), this.entity.worldY.get())
     }
 
     destructor(){
+		this.hitbox.destroy()
         this.game.talkables.splice(this.game.talkables.indexOf(this), 1)
     }
 }

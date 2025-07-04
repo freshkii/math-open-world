@@ -1,3 +1,4 @@
+import { constants } from "../constants.js"
 import { Game } from "./game.js"
 
 export class InputHandler {

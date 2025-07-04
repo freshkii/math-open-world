@@ -1,12 +1,151 @@
 html, body {
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-    pointer-events: none;
+  padding: 0;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f0f8ff, #e6f7ff);
+  color: #333;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+header {
+  background-color: #2b2d42;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav button {
+  background-color: #edf2f4;
+  color: #2b2d42;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+nav button:hover {
+  background-color: #dbe0e4;
+}
+
+.hero-banner {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: url('assets/images/background.jpg') center/cover no-repeat;
+  color: #fff;
+  position: relative;
+  min-height: calc(100vh - 100px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.hero-banner .overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 2rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-banner h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero-banner p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.hero-banner button {
+  background-color: #ef233c;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 0 #b71c2a;
+  align-self: center;
+}
+
+.hero-banner button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #8d1622;
+}
+
+.hero-banner button:hover {
+  background-color: #d90429;
+}
+
+#loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #222;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.2rem;
+}
+
+.spinner {
+  border: 6px solid #1b1d2d;
+  border-top: 6px solid #00cc66;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #555;
 }
 
 canvas {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-	will-change: transform;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  will-change: transform;
+  width: 100vw;
+  height: 100vh;
+  display: block;
 }
